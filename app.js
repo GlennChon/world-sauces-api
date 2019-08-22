@@ -1,7 +1,5 @@
 const express = require("express");
-const http = require("http");
 const _ = require("underscore");
-const Joi = require("joi");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const config = require("config");
