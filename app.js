@@ -5,6 +5,8 @@ const Joi = require("joi");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const config = require("config");
+const startupDebugger = require("debug")("app:startup");
+const dbDebugger = require("debug")("app:db");
 
 const recipes = require("./_tempData/recipes.json");
 const countries = require("./_tempData/countries.json");
@@ -19,10 +21,12 @@ app.use(express.static("public")); // serve public folder
 app.use(helmet());
 
 console.log("Application Name: " + config.get("name"));
-console.log("Mail Server: " + config.get("mail.host"));
+// console.log("Mail Server: " + config.get("mail.host"));
+// console.log("Mail Password: " + config.get("mail.password"));
+
 if (app.get("env") === "development") {
   app.use(morgan("tiny")); // logger middleware
-  console.log("Morgan enabled...");
+  startupDebugger("Morgan enabled...");
 }
 
 // Home

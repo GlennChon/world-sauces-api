@@ -6,8 +6,20 @@
 
 ## Environment Variables
 
-- mail_server_password
-  e.g. \$env:mail_server_password="YourMailServerPassword"
+DEBUG
+
+- \$env:DEBUG="app:\*"
+  Show All Debuggers
+
+- \$env:DEBUG="app:startup"
+  Startup Debugger
+
+- \$env:DEBUG="app:db"
+  Database Debugger
+
+mail_server_password
+
+-\$env:mail_server_password="YourMailServerPassword"
 
 ## Deployment
 
