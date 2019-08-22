@@ -4,19 +4,26 @@ const _ = require("underscore");
 const Joi = require("joi");
 const helmet = require("helmet");
 const morgan = require("morgan");
-
-const logger = require("./middleware/logger");
+const config = require("config");
 
 const recipes = require("./_tempData/recipes.json");
 const countries = require("./_tempData/countries.json");
 const tasteProfiles = require("./_tempData/tasteProfiles.json");
+
 const app = express();
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
-app.use(logger);
+app.use(express.static("public")); // serve public folder
+app.use(helmet());
+
+console.log("Application Name: " + config.get("name"));
+console.log("Mail Server: " + config.get("mail.host"));
+if (app.get("env") === "development") {
+  app.use(morgan("tiny")); // logger middleware
+  console.log("Morgan enabled...");
+}
 
 // Home
 app.get("/", (req, res) => {
