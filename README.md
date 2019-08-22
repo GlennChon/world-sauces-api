@@ -11,5 +11,6 @@
 - "mongoose": "^5.6.10"
 - "underscore": "^1.9.1"
 - "express": "^4.17.1"
+- "joi": "^14.3.1"
 
 ## Additional Notes
