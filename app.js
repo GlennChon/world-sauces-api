@@ -2,15 +2,21 @@ const express = require("express");
 const http = require("http");
 const _ = require("underscore");
 const Joi = require("joi");
+const helmet = require("helmet");
+const morgan = require("morgan");
 
-const log = require("./logger");
+const logger = require("./middleware/logger");
 
 const recipes = require("./_tempData/recipes.json");
 const countries = require("./_tempData/countries.json");
 const tasteProfiles = require("./_tempData/tasteProfiles.json");
 const app = express();
 
+// Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
+app.use(logger);
 
 // Home
 app.get("/", (req, res) => {
@@ -20,7 +26,6 @@ app.get("/", (req, res) => {
 // COUNTRIES
 // Get list of countries
 app.get("/api/countries", (req, res) => {
-  log("Sending list of countries");
   res.send(countries);
 });
 
@@ -42,7 +47,6 @@ app.get("/api/tasteprofiles", (req, res) => {
 // RECIPES
 // Get list of recipes
 app.get("/api/recipes", (req, res) => {
-  log("Sending all recipes");
   res.send(recipes);
 });
 
@@ -104,4 +108,4 @@ function validateRecipe(recipe) {
 
 // Port
 const port = process.env.PORT || 3000;
-app.listen(port, () => log(`Listening on port ${port}`));
+app.listen(port, () => console.log(`Listening on port ${port}`));
