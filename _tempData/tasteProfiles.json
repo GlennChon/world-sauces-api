@@ -1,0 +1,44 @@
+[
+  {
+    "id": 0,
+    "name": "BITTER",
+    "desc": "An astringent taste sensation.",
+    "eg": "Citrus peel, unsweetened cocoa, black coffee, tea, kale."
+  },
+  {
+    "id": 1,
+    "name": "NUMBING",
+    "desc": "A tingling sensation, usually associated with the loss of other sensations.",
+    "eg": "Sichuan peppercorns, fugu"
+  },
+  {
+    "id": 2,
+    "name": "SALTY",
+    "desc": "A taste sensation suggestive of seawater.",
+    "eg": "Salt, fish sauce, soy sauce, miso"
+  },
+  {
+    "id": 3,
+    "name": "SOUR",
+    "desc": "A tart or tangy taste sensation produced chiefly by acids.",
+    "eg": "Citrus fruits, vinegar, tart cherries or apples."
+  },
+  {
+    "id": 4,
+    "name": "SPICY",
+    "desc": "A tingling sensation, technically not a taste, rather a form of pain sensation",
+    "eg": "Jalepenos, carolina reapers, birdseye chilis"
+  },
+  {
+    "id": 5,
+    "name": "SWEET",
+    "desc": "A taste sensation described as pleasant and having the characteristics of sugar or honey.",
+    "eg": "Sugar, honey, various fruits."
+  },
+  {
+    "id": 6,
+    "name": "UMAMI",
+    "desc": "A Savory sensation produced by the presence of glutamates and nucleotides and usually associated with meats and other high-protein foods.",
+    "eg": "Cheese, miso, worcestershire sauce, grilled meats, tomato paste"
+  }
+]
