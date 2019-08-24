@@ -4,6 +4,12 @@
 
 ## Endpoints
 
+- "/api/recipes"
+- "/api/recipevariations"
+- "/api/users"
+- "/api/countries"
+- "/api/tasteprofiles"
+
 ## Environment Variables
 
 DEBUG
