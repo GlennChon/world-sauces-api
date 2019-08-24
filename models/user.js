@@ -2,16 +2,13 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   username: String,
-  recipes: [
+  firstname: String,
+  lastname: String,
+  email: String,
+  recipesAdded: Number,
+  likes: [
     {
-      recipe: {
-        ref: "recipes",
-        id: mongoose.ObjectId
-      },
-      recipe_data: {
-        likes: Number,
-        title: String
-      }
+      recipe: mongoose.ObjectId
     }
   ]
 });
