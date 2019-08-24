@@ -25,7 +25,7 @@ DEBUG
 
 mail_server_password
 
--\$env:mail_server_password="YourMailServerPassword"
+- \$env:mail_server_password="YourMailServerPassword"
 
 ## Deployment
 
