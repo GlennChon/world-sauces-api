@@ -2,13 +2,10 @@ const mongoose = require("mongoose");
 
 const recipeVariationSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  originCountry: { name: String, code: String },
+  origin_country: { name: String, code: String },
   recipes: [
     {
-      recipe: {
-        ref: "recipes",
-        id: mongoose.ObjectId
-      },
+      recipe: mongoose.ObjectId,
       recipe_data: {
         likes: Number,
         image_link: String
@@ -18,7 +15,7 @@ const recipeVariationSchema = new mongoose.Schema({
 });
 
 const RecipeVariation = mongoose.model(
-  "RecipeVariation",
+  "recipe_variations",
   recipeVariationSchema
 );
 
