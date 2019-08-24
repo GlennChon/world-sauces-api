@@ -1,3 +1,21 @@
 const mongoose = require("mongoose");
 
-module.exports = userSchema;
+const userSchema = new mongoose.Schema({
+  username: String,
+  recipes: [
+    {
+      recipe: {
+        ref: "recipes",
+        id: mongoose.ObjectId
+      },
+      recipe_data: {
+        likes: Number,
+        title: String
+      }
+    }
+  ]
+});
+
+const User = mongoose.model("User", UserSchema);
+
+module.exports = User;

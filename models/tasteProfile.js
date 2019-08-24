@@ -6,4 +6,6 @@ const tasteProfileSchema = new mongoose.Schema({
   eg: String
 });
 
-module.exports = tasteProfileSchema;
+const TasteProfile = mongoose.model("TasteProfile", tasteProfileSchema);
+
+module.exports = TasteProfile;

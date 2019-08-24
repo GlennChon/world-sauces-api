@@ -1,24 +1,20 @@
 const mongoose = require("mongoose");
 
 const recipeSchema = new mongoose.Schema({
-  title: String,
-  imageLink: String,
-  submittedBy: mongoose.ObjectId,
-  submittedDate: { type: Date, default: Date.now },
-  edited: [
-    {
-      editor: mongoose.ObjectId,
-      editDate: { type: Date, default: Date.now }
-    }
-  ],
-  originCountry: { name: String, code: String },
+  title: { type: String, required: true },
+  origin_country: { name: String, code: String },
+  author: { type: String, required: true },
+  submitted_date: { type: Date, default: Date.now },
+  last_edited: { type: Date, default: Date.now },
+  likes: { type: Number, default: 1 },
+  image_link: { type: String, default: "" },
   description: String,
-  tasteProfile: [String],
+  taste_profile: [{ type: String, default: "" }],
   ingredients: [
     {
-      amount: String,
-      measurement: String,
-      ingredient: String
+      amount: { type: String, required: true },
+      measurement: { type: String, required: true },
+      ingredient: { type: String, required: true }
     }
   ],
   instructions: [String]
