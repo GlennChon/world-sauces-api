@@ -10,13 +10,7 @@ const recipeSchema = new mongoose.Schema({
   image_link: { type: String, default: "" },
   description: String,
   taste_profile: [{ type: String, default: "" }],
-  ingredients: [
-    {
-      amount: { type: String, required: true },
-      measurement: { type: String, required: true },
-      ingredient: { type: String, required: true }
-    }
-  ],
+  ingredients: [String],
   instructions: [String]
 });
 
