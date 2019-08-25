@@ -36,5 +36,7 @@ mail_server_password
 - "express": "^4.17.1"
 - "joi": "^14.3.1"
 - "config": "^3.2.2"
+- "bcrypt": "^3.0.6"
+- "jsonwebtoken": "^8.5.1"
 
 ## Additional Notes
