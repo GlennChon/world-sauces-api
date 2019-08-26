@@ -1,12 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const Joi = require("joi");
 
-const tasteProfiles = require("../_tempData/tasteProfiles.json"); // temp
+const {
+  TasteProfile,
+  validateTasteProfile
+} = require("../models/tasteProfile");
 
 // TASTE PROFILES
 // Get list of taste profiles
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
+  const tasteProfiles = await TasteProfile.find().sort({ name: 1 });
   res.send(tasteProfiles);
 });
 

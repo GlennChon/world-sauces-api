@@ -32,3 +32,23 @@ router.post("/", async (req, res) => {
 });
 
 module.exports = router;
+
+// Increment User Like Count
+incrementUserLikes = async user => {
+  return await user.updateOne({ $inc: { likes: 1 } });
+};
+
+// Decerement User Like Count
+decrementUserLikes = async user => {
+  return await user.updateOne({ $inc: { likes: -1 } });
+};
+// User //
+// Create new user
+// Get User by id
+getUserById = async id => {
+  const user = await User.findById(id);
+  if (!user) return;
+  return user;
+};
+// Update User
+// Delete User

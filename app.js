@@ -9,14 +9,14 @@ const mongoose = require("mongoose");
 
 // Routes
 const homeRoute = require("./routes/home");
+// const usersRoute = require("./routes/users");
 const recipesRoute = require("./routes/recipes");
 const countriesRoute = require("./routes/countries");
 const tasteProfilesRoute = require("./routes/tasteProfiles");
 
 // Models
-const Recipe = require("./models/recipe");
+const User = require("./models/user");
 const Country = require("./models/country");
-const RecipeVariation = require("./models/recipeVariation");
 const TasteProfile = require("./models/tasteProfile");
 
 const app = express();
@@ -30,242 +30,11 @@ app.use(helmet());
 // Mongo Connection
 mongoose
   .connect("mongodb://localhost:27017/world_sauces", { useNewUrlParser: true })
-  .then(() => console.log("Connected to MongoDB..."))
-  .catch(err => console.error("Could not connect to MongoDB...", err));
-
-const recipe = new Recipe({
-  title: "Texas BBQ Sauce",
-  image_link: "https://www.glennchon.com",
-  author: "WorldSauces",
-  submitted_date: Date.now(),
-  last_edited: Date.now(),
-  origin_country: { name: "USA", code: "US" },
-  description: "Some Text Description of sauce.",
-  likes: 12,
-  taste_profile: [
-    "BITTER",
-    "NUMBING",
-    "SALTY",
-    "SOUR",
-    "SPICY",
-    "SWEET",
-    "UMAMI"
-  ],
-  ingredients: [
-    { amount: "1", measurement: "Cup", ingredient: "Chili powder" },
-    { amount: "2", measurement: "Tablespoon", ingredient: "Water" },
-    { amount: "3", measurement: "Teaspoon", ingredient: "Salt" }
-  ],
-  instructions: [
-    "Step 1 instructions",
-    "Step 2 instructions",
-    "Step 3 instructions",
-    "Step 4 instructions"
-  ]
-});
-
-// Recipes
-// Get all recipes
-getRecipes = async () => {
-  const pageNumber = 1;
-  const pageSize = 24;
-
-  const recipes = await Recipe.find()
-    .sort({ likes: -1 })
-    .select({ title: 1, origin_country: 1, likes: 1 })
-    .skip((pageNumber - 1) * pageSize)
-    .limit(pageSize);
-  console.log(recipes);
-  return recipes;
-};
-
-// Create a new recipe
-createRecipe = async recipe => {
-  // save recipe
-  const result = await recipe.save();
-  console.log(result);
-
-  return await UpdateQueryFirstRecipeVars(recipe);
-};
-
-// Get recipe by id
-getRecipe = async id => {
-  const result = await Recipe.findById(id);
-  if (!result) return;
-  return result;
-  console.log(result);
-};
-
-// Update recipe
-updateRecipe = async recipe => {
-  const result = await Recipe.findById(recipe._id);
-  if (!result) return;
-
-  return await recipe.save();
-};
-
-// Like Recipe
-likeRecipe = async recipe => {
-  recipe.update({ $inc: { likes: 1 } });
-};
-
-// Recipe Variations //
-// Get All
-getRecipeVars = async () => {
-  const pageNumber = 1;
-  const pageSize = 24;
-
-  const recipeVariations = await RecipeVariation.find()
-    .skip((pageNumber - 1) * pageSize)
-    .limit(pageSize);
-  console.log(recipeVariations);
-  return recipeVariations;
-};
-
-// Get By Search Value
-getRecipeVarsByValue = async searchValue => {
-  const pageNumber = 1;
-  const pageSize = 24;
-  // Substring search
-  const recipeVariations = await RecipeVariation.find({
-    title: new RegExp(searchValue, "i")
-  })
-    .skip((pageNumber - 1) * pageSize)
-    .limit(pageSize);
-  console.log(recipeVariations);
-  return recipeVariation;
-};
-
-// Get By Country
-getRecipeVarsByCountry = async code => {
-  const pageNumber = 1;
-  const pageSize = 24;
-  // Exact country code match
-  const recipeVariations = await RecipeVariation.find({
-    "origin_country.code": new RegExp("^" + code + "$", "i")
-  })
-    .skip((pageNumber - 1) * pageSize)
-    .limit(pageSize);
-  console.log(recipeVariations);
-  return recipeVariations;
-};
-
-// Get By Search Value and Country
-getRecipeVarsByValueCountry = async (searchValue, code) => {
-  const pageNumber = 1;
-  const pageSize = 24;
-  const recipeVariations = await RecipeVariation.find()
-    .and([
-      {
-        title: new RegExp(searchValue, "i")
-      },
-      {
-        "origin_country.code": new RegExp("^" + code + "$", "i")
-      }
-    ])
-    .skip((pageNumber - 1) * pageSize)
-    .limit(pageSize);
-
-  console.log(recipeVariations);
-  return recipeVariations;
-};
-
-// Update Query First Recipe Variation
-UpdateQueryFirstRecipeVars = async recipe => {
-  // Check if recipeVariation exists for specific title and country
-  const recipeVariation = await RecipeVariation.findOne().and([
-    {
-      title: new RegExp("^" + recipe.title + "$", "i")
-    },
-    {
-      "origin_country.code": new RegExp(
-        "^" + recipe.origin_country.code + "$",
-        "i"
-      )
-    }
-  ]);
-
-  // if there is no recipeVariation list, create a new one, else add to existing
-  if (!recipeVariation) {
-    return await createRecipeVariation(recipe);
-  } else {
-    return await addRecipeVariation(recipeVariation, recipe);
-  }
-};
-
-// Create new variation list
-createRecipeVariation = async recipe => {
-  const recipeVariation = new RecipeVariation({
-    title: recipe.title,
-    origin_country: {
-      name: recipe.origin_country.name,
-      code: recipe.origin_country.code
-    },
-    recipes: [
-      {
-        recipe_data: { image_link: recipe.image_link, likes: recipe.likes },
-        recipe: recipe._id
-      }
-    ]
-  });
-
-  return await recipeVariation.save();
-};
-
-// Add to existing variation list, update First
-addRecipeVariation = async (recipeVariation, recipe) => {
-  const result = await RecipeVariation.update(
-    { _id: recipeVariation._id },
-    {
-      $push: {
-        recipes: {
-          recipe_data: { image_link: recipe.image_link, likes: recipe.likes },
-          recipe: recipe._id
-        }
-      }
-    }
-  );
-  console.log(result);
-  return result;
-};
-
-// Update likes for existing recipe variation
-// TODO
-
-// Countries //
-// Get all countries
-getCountries = async () => {
-  const countries = await Country.find().select({ _id: 0, name: 1, code: 1 });
-  console.log(countries);
-  return countries;
-};
-
-// Taste Profiles //
-// Get all taste profiles
-getTasteProfiles = async () => {
-  const tasteProfiles = await TasteProfile.find();
-  console.log(tasteProfiles);
-  return tasteProfiles;
-};
-
-// User //
-// Create new user
-// Get User by id
-// Update User
-// Delete User
-
-// getRecipes();
-// getRecipeVars();
-// getRecipeVarsByValue("BBQ");
-// getRecipeVarsByCountry("US");
-// getRecipeVarsByValueCountry("bbq", "Us");
-// getCountries();
-// getTasteProfiles();
-// UpdateQueryFirstRecipeVars(recipe);
+  .then(() => console.log("Connected to DB..."))
+  .catch(err => console.error("Could not connect to DB...", err));
 
 app.use("/", homeRoute);
 app.use("/api/recipes", recipesRoute);
-// app.use("/api/recipevariations", recipeVariationsRoute);
 // app.use("/api/users", usersRoute);
 app.use("/api/countries", countriesRoute);
 app.use("/api/tasteprofiles", tasteProfilesRoute);
@@ -282,3 +51,65 @@ if (app.get("env") === "development") {
 // Port
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}`));
+
+// let user = new User({
+//   username: "WorldSauces",
+//   firstname: "Glenn",
+//   lastname: "Chon",
+//   about: "Creator of World Sauces, direct inquiries to Glenn.Chon@gmail.com",
+//   email: "Glenn.Chon@gmail.com",
+//   password: "testPassword1$",
+//   isAdmin: true,
+//   likes: 0
+// });
+
+// // Sample Recipe
+// let recipe = new Recipe({
+//   likes: 2,
+//   image_link:
+//     "https://cdn2.tmbi.com/TOH/Images/Photos/37/1200x1200/exps156976_THCA153054A06_13_4b.jpg",
+//   taste_profile: ["SALTY", "SOUR", "SPICY", "SWEET"],
+//   ingredients: [
+//     "15 oz Tomato Sauce",
+//     "1/2 Cup Apple Juice",
+//     "1/4 Cup Apple Cider Vinegar",
+//     "1/4 Cup Packed Dark Brown Sugar",
+//     "2 Tablespoons Molasses",
+//     "1 Tablespoon Worcestershire Sauce",
+//     "1 Tablespoon Onion Powder",
+//     "2 Teaspoons Garlic Powder",
+//     "1 Teaspoon Mustard",
+//     "1/4 Teaspoon Cayenne Pepper"
+//   ],
+//   instructions: [
+//     "Combine all ingredients in sauce pan.",
+//     "Simmer over low heat for 20 minutes, stirring periodically."
+//   ],
+//   title: "Test",
+//   author: "WorldSauces",
+//   submitted_date: Date.now(),
+//   last_edited: Date.now(),
+//   origin_country: { name: "Canada", code: "CA" },
+//   description: "A basic Texas BBQ sauce 2."
+// });
+
+// getRecipes();
+// getRecipesByValue("BBQ");
+// getRecipesByCountry("US");
+// getRecipesByValueCountry("bbq", "Us");
+// getRecipeById("5d6279567fb75f0f38842f25");
+// getCountries();
+// getTasteProfiles();
+//createRecipe(recipe);
+async function testFunction() {
+  let test;
+  //test = await createRecipe(recipe);
+  //test = await updateRecipe("5d63b2bceffa723c9c8ba84d");
+  //let inc = await decrementRecipeLikes(test);
+  // console.log(inc);
+
+  //console.log(test);
+  //await getRecipesByValueCountry("bbq", "US");
+}
+
+testFunction();
