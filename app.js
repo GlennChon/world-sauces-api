@@ -29,7 +29,11 @@ app.use(helmet());
 
 // Mongo Connection
 mongoose
-  .connect("mongodb://localhost:27017/world_sauces", { useNewUrlParser: true })
+  .connect("mongodb://localhost:27017/world_sauces", {
+    useNewUrlParser: true,
+    useFindAndModify: false,
+    useCreateIndex: true
+  })
   .then(() => console.log("Connected to DB..."))
   .catch(err => console.error("Could not connect to DB...", err));
 
