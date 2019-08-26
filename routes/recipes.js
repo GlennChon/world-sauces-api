@@ -8,8 +8,23 @@ const { Recipe, validateRecipe } = require("../models/recipe");
 router.get("/", async (req, res) => {
   const pageNumber = 1;
   const pageSize = 24;
+  let findProperties = {};
+  const countryCode = req.query.country;
+  const searchValue = req.query.search;
 
-  const recipes = await Recipe.find()
+  // if countryCode query parameter exists search using country code
+  if (countryCode) {
+    const countryRegex = new RegExp("^" + countryCode.toUpperCase() + "$", "i");
+    findProperties["origin_country.code"] = countryRegex;
+  }
+  // if searchValue query parameter exists search using search term
+  if (searchValue) {
+    const searchRegex = new RegExp(searchValue, "i");
+    findProperties["title"] = searchRegex;
+  }
+
+  const recipes = await Recipe.find(findProperties)
+    // sort by likes desc
     .sort({ likes: -1 })
     .select({
       _id: 1,
@@ -19,6 +34,7 @@ router.get("/", async (req, res) => {
       image_link: 1,
       likes: 1
     })
+    //pagination
     .skip((pageNumber - 1) * pageSize)
     .limit(pageSize);
   res.send(recipes);
