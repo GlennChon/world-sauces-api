@@ -10,31 +10,4 @@ router.get("/", async (req, res) => {
   res.send(countries);
 });
 
-// Get recipes by country
-router.get("/:code", async (req, res) => {
-  const pageNumber = 1;
-  const pageSize = 24;
-  try {
-    const countryRecipes = await Recipe.find({
-      "origin_country.code": req.params.code.toUpperCase().toString()
-    })
-      .sort({ likes: -1 })
-      .select({
-        _id: 1,
-        title: 1,
-        taste_profile: 1,
-        origin_country: 1,
-        image_link: 1,
-        likes: 1
-      })
-      .skip((pageNumber - 1) * pageSize)
-      .limit(pageSize);
-
-    if (!countryRecipes) return res.status(404).send("No such country");
-    res.send(countryRecipes);
-  } catch (err) {
-    console.error(err);
-  }
-});
-
 module.exports = router;
