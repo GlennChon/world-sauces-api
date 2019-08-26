@@ -9,16 +9,12 @@ const mongoose = require("mongoose");
 
 // Routes
 const homeRoute = require("./routes/home");
-// const usersRoute = require("./routes/users");
+//const usersRoute = require("./routes/users");
 const recipesRoute = require("./routes/recipes");
 const countriesRoute = require("./routes/countries");
 const tasteProfilesRoute = require("./routes/tasteProfiles");
 
-// Models
-const User = require("./models/user");
-const Country = require("./models/country");
-const TasteProfile = require("./models/tasteProfile");
-
+//Express
 const app = express();
 
 // Middleware
@@ -39,7 +35,7 @@ mongoose
 
 app.use("/", homeRoute);
 app.use("/api/recipes", recipesRoute);
-// app.use("/api/users", usersRoute);
+//app.use("/api/users", usersRoute);
 app.use("/api/countries", countriesRoute);
 app.use("/api/tasteprofiles", tasteProfilesRoute);
 
