@@ -1,49 +1,46 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
+const { Country, countrySchema, validateCountry } = require("./country");
 
-const Recipe = mongoose.model(
-  "recipes",
-  new mongoose.Schema({
-    title: { type: String, required: true, trim: true },
-    origin_country: {
-      name: { type: String, required: true },
-      code: { type: String, required: true }
-    },
-    author: { type: String, required: true },
-    submitted_date: { type: Date, default: Date.now },
-    last_edited: { type: Date, default: Date.now },
-    likes: { type: Number, default: 1 },
-    image_link: { type: String, default: "", trim: true },
-    description: { type: String, default: "" },
-    taste_profile: {
-      type: Array,
-      validate: {
-        validator: function(v) {
-          return v && v.length > 0;
-        },
-        message: "A recipe should have at least 1 taste descriptor."
-      }
-    },
-    ingredients: {
-      type: Array,
-      validate: {
-        validator: function(v) {
-          return v && v.length > 1;
-        },
-        message: "A recipe should have at least 2 ingredient."
-      }
-    },
-    instructions: {
-      type: Array,
-      validate: {
-        validator: function(v) {
-          return v && v.length > 0;
-        },
-        message: "A recipe should have at least 1 instruction."
-      }
+const recipeSchema = new mongoose.Schema({
+  title: { type: String, min: 2, max: 255, required: true, trim: true },
+  origin_country: countrySchema,
+  author: { type: String, required: true },
+  submitted_date: { type: Date, default: Date.now },
+  last_edited: { type: Date, default: Date.now },
+  likes: { type: Number, default: 1 },
+  image_link: { type: String, default: "", trim: true },
+  description: { type: String, default: "" },
+  taste_profile: {
+    type: Array,
+    validate: {
+      validator: function(v) {
+        return v && v.length > 0;
+      },
+      message: "A recipe should have at least 1 taste descriptor."
     }
-  })
-);
+  },
+  ingredients: {
+    type: Array,
+    validate: {
+      validator: function(v) {
+        return v && v.length > 1;
+      },
+      message: "A recipe should have at least 2 ingredient."
+    }
+  },
+  instructions: {
+    type: Array,
+    validate: {
+      validator: function(v) {
+        return v && v.length > 0;
+      },
+      message: "A recipe should have at least 1 instruction."
+    }
+  }
+});
+
+const Recipe = mongoose.model("recipes", recipeSchema);
 
 // Joi validation
 
@@ -51,7 +48,7 @@ function validateRecipe(recipe) {
   const schema = {
     title: Joi.string()
       .min(2)
-      .max(50),
+      .max(255),
     origin_country: {
       name: Joi.string(),
       code: Joi.string()
@@ -68,4 +65,5 @@ function validateRecipe(recipe) {
   };
   return Joi.validate(recipe, schema);
 }
-module.exports = { Recipe, validateRecipe };
+
+module.exports = { Recipe, recipeSchema, validateRecipe };
