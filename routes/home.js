@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 // Home
+// Get
 router.get("/", (req, res) => {
-  res.send("World Sauces Home");
+  res.render("index", { title: "World Sauce Api Home Page", message: "Hello" });
 });
 
 module.exports = router;
