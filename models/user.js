@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     minLength: 6
   },
   isAdmin: { type: Boolean, default: false },
-  likes: { type: Number, default: 0 }
+  likes: [{ types: mongoose.Schema.Types.ObjectId, ref: "Recipe" }]
 });
 
 userSchema.methods.generateAuthToken = function() {
