@@ -1,11 +1,24 @@
 const mongoose = require("mongoose");
+const Joi = require("joi");
 
-const tasteProfileSchema = new mongoose.Schema({
-  name: String,
-  desc: String,
-  eg: String
-});
+const TasteProfile = mongoose.model(
+  "taste_profiles",
+  new mongoose.Schema({
+    name: { type: String, required: true },
+    desc: { type: String, required: true },
+    eg: { type: String, required: true }
+  })
+);
 
-const TasteProfile = mongoose.model("taste_profiles", tasteProfileSchema);
+// Not needed but created for possibility of taste profile edits
+function validateTasteProfile(tasteProfile) {
+  const schema = {
+    name: Joi.string(),
+    desc: Joi.string(),
+    eg: Joi.string()
+  };
 
-module.exports = TasteProfile;
+  return Joi.validate(tasteProfile, schema);
+}
+
+module.exports = { TasteProfile, validateTasteProfile };

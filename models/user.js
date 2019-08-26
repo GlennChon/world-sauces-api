@@ -4,7 +4,14 @@ const config = require("config");
 const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema({
-  username: { type: String, unique: true, required: true },
+  username: {
+    type: String,
+    unique: true,
+    required: true,
+    trim: true,
+    min: 3,
+    max: 20
+  },
   firstname: { type: String, default: "", maxlength: 50 },
   lastname: { type: String, default: "", maxLength: 50 },
   about: { type: String, default: "" },
@@ -12,12 +19,10 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minLength: 5,
-    maxLength: 1024
+    minLength: 6
   },
   isAdmin: { type: Boolean, default: false },
-  recipes: [{}],
-  totalLikes: { type: Number, default: 0, required: true }
+  likes: { type: Number, default: 0 }
 });
 
 userSchema.methods.generateAuthToken = function() {
@@ -27,14 +32,13 @@ userSchema.methods.generateAuthToken = function() {
   );
 };
 
-const User = mongoose.model("User", userSchema);
-
 // Joi validation
 function validateUser(user) {
   const schema = {
-    name: Joi.string()
+    username: Joi.string()
+      .alphanum()
       .min(5)
-      .max(50)
+      .max(16)
       .required(),
     email: Joi.string()
       .min(5)
@@ -42,12 +46,14 @@ function validateUser(user) {
       .required()
       .email(),
     password: Joi.string()
-      .min(5)
-      .max(1024)
+      .regex(/^[a-zA-Z0-9]{6,16}$/)
+      .min(6)
+      .max(24)
       .required()
   };
   return Joi.validate(user, schema);
 }
 
-exports.User = User;
+const User = mongoose.model("User", userSchema);
+module.exports = User;
 exports.validate = validateUser;
