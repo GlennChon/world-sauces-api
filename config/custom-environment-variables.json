@@ -1,5 +1,7 @@
 {
   "mail": {
     "password": "mail_server_password"
-  }
+  },
+
+  "jwtPrivateKey": "jwt_private_key"
 }

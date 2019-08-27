@@ -1,3 +1,6 @@
 {
-  "name": "World Sauces App"
+  "name": "World Sauces App",
+  "jwtPrivateKey": "unsecureKey",
+  "port": "3333",
+  "requiresAuth": false
 }

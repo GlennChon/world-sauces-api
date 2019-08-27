@@ -2,5 +2,6 @@
   "name": "World Sauces App - Development",
   "mail": {
     "host": "dev-mail-server"
-  }
+  },
+  "db": "mongodb://localhost:27017/world_sauces"
 }
