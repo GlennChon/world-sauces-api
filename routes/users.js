@@ -12,7 +12,6 @@ router.get("/me", auth, async (req, res) => {
 
 // Register User
 router.post("/", async (req, res) => {
-  // Validation schema using Joi
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -22,8 +21,8 @@ router.post("/", async (req, res) => {
   user = new User(_.pick(req.body, ["name", "email", "password"]));
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(user.password, salt);
-
   await user.save();
+
   const token = user.generateAuthToken();
   res
     .header("x-auth-token", token)
