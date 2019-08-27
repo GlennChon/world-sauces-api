@@ -21,6 +21,7 @@ require("./startup/routes")(app);
 // require("./startup/config")();
 // require("./startup/validation")();
 
+// TODO: make mail server connection for sending confirmation mail
 // console.log("Mail Server: " + config.get("mail.host"));
 // console.log("Mail Password: " + config.get("mail.password"));
 
