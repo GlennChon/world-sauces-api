@@ -1,19 +1,17 @@
-const express = require("express");
 const _ = require("underscore");
-const helmet = require("helmet");
 const morgan = require("morgan");
 const config = require("config");
-const startupDebugger = require("debug")("app:startup");
-const dbDebugger = require("debug")("app:db");
-const mongoose = require("mongoose");
+const express = require("express");
+const winston = require("winston");
+
 const app = express();
 
 // Startup
-console.log("Application Name: " + config.get("name"));
+winston.info("Application Name: " + config.get("name"));
 
 if (app.get("env") === "development") {
   app.use(morgan("tiny")); // logger middleware
-  startupDebugger("Morgan enabled...");
+  winston.info("Morgan enabled...");
 }
 
 require("./startup/db")();
@@ -93,3 +91,5 @@ async function testFunction() {
 }
 
 testFunction();
+
+module.exports = server;
