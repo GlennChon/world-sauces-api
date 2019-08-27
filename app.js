@@ -6,51 +6,31 @@ const config = require("config");
 const startupDebugger = require("debug")("app:startup");
 const dbDebugger = require("debug")("app:db");
 const mongoose = require("mongoose");
-
-// Routes
-const homeRoute = require("./routes/home");
-//const usersRoute = require("./routes/users");
-const recipesRoute = require("./routes/recipes");
-const countriesRoute = require("./routes/countries");
-const tasteProfilesRoute = require("./routes/tasteProfiles");
-
-//Express
 const app = express();
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public")); // serve public folder
-app.use(helmet());
-
-// Mongo Connection
-mongoose
-  .connect("mongodb://localhost:27017/world_sauces", {
-    useNewUrlParser: true,
-    useFindAndModify: false,
-    useCreateIndex: true
-  })
-  .then(() => console.log("Connected to DB..."))
-  .catch(err => console.error("Could not connect to DB...", err));
-
-app.use("/", homeRoute);
-app.use("/api/recipes", recipesRoute);
-//app.use("/api/users", usersRoute);
-app.use("/api/countries", countriesRoute);
-app.use("/api/tasteprofiles", tasteProfilesRoute);
-
+// Startup
 console.log("Application Name: " + config.get("name"));
-// console.log("Mail Server: " + config.get("mail.host"));
-// console.log("Mail Password: " + config.get("mail.password"));
 
 if (app.get("env") === "development") {
   app.use(morgan("tiny")); // logger middleware
   startupDebugger("Morgan enabled...");
 }
 
+require("./startup/db")();
+require("./startup/routes")(app);
+// require("./startup/logging")();
+// require("./startup/cors")(app);
+// require("./startup/config")();
+// require("./startup/validation")();
+
+// console.log("Mail Server: " + config.get("mail.host"));
+// console.log("Mail Password: " + config.get("mail.password"));
+
 // Port
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Listening on port ${port}`));
+const port = process.env.PORT || config.get("port");
+const server = app.listen(port, () =>
+  winston.info(`Listening on port ${port}...`)
+);
 
 // let user = new User({
 //   username: "WorldSauces",
