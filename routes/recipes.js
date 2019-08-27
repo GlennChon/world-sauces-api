@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 
 const { Recipe, validateRecipe } = require("../models/recipe");
+const { Country } = require("../models/country");
+const { TasteProfile } = require("../models/tasteProfile");
 
 // RECIPES
 // Get list of recipes
@@ -52,16 +54,35 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   const { error } = validateRecipe(req.body.recipe);
   if (error) return res.status(400).send(error.details[0].message);
+
+  const country = await Country.findOne({
+    code: req.body.origin_country_code.toUpperCase()
+  });
+  if (!country) return res.status(400).send("Invalid country.");
+
+  console.log(req.body.taste_profile);
+
+  const tasteProfile = await TasteProfile.find({
+    name: { $in: req.body.taste_profile }
+  })
+    .select({ _id: 1, name: 1 })
+    .sort({ name: 1 });
+  if (!tasteProfile) return res.status(400).send("No taste descriptors added.");
+
   let recipe = new Recipe({
     title: req.body.title,
-    origin_country: req.body.origin_country,
+    origin_country: {
+      _id: country._id,
+      name: country.name,
+      code: country.code
+    },
     author: req.body.author,
     submitted_date: Date.now(),
     last_edited: Date.now(),
     likes: req.body.likes,
     image_link: req.body.image_link,
     description: req.body.description,
-    taste_profile: req.body.taste_profile,
+    taste_profile: tasteProfile,
     ingredients: req.body.ingredients,
     instructions: req.body.instructions
   });
