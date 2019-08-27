@@ -9,7 +9,6 @@ const tasteProfileSchema = new mongoose.Schema({
 
 const TasteProfile = mongoose.model("taste_profiles", tasteProfileSchema);
 
-// Not needed but created for possibility of taste profile edits
 function validateTasteProfile(tasteProfile) {
   const schema = {
     name: Joi.string(),
