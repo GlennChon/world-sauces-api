@@ -49,13 +49,10 @@ function validateRecipe(recipe) {
     title: Joi.string()
       .min(2)
       .max(255),
-    origin_country: {
-      name: Joi.string(),
-      code: Joi.string()
-    },
+    origin_country_code: Joi.string()
+      .max(2)
+      .min(2),
     author: Joi.string(),
-    submitted_date: Joi.date(),
-    last_edited: Joi.date(),
     likes: Joi.number().integer(),
     image_link: Joi.string(),
     description: Joi.string(),
