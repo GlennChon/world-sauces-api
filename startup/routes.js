@@ -3,7 +3,7 @@ const express = require("express");
 const error = require("../middleware/error");
 const auth = require("../middleware/auth");
 const docsRoute = require("../routes/docs");
-//const usersRoute = require("../routes/users");
+const usersRoute = require("../routes/users");
 const recipesRoute = require("../routes/recipes");
 const countriesRoute = require("../routes/countries");
 const tasteProfilesRoute = require("../routes/tasteProfiles");
@@ -16,7 +16,7 @@ module.exports = function(app) {
 
   app.use("/api/docs", docsRoute);
   app.use("/api/auth", auth);
-  //app.use("/api/users", usersRoute);
+  app.use("/api/users", usersRoute);
   app.use("/api/recipes", recipesRoute);
   app.use("/api/countries", countriesRoute);
   app.use("/api/tasteprofiles", tasteProfilesRoute);
