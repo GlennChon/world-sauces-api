@@ -11,8 +11,8 @@ router.get("/", async (req, res) => {
   const pageNumber = 1;
   const pageSize = 24;
   let findProperties = {};
-  const countryCode = req.query.country;
-  const searchValue = req.query.search;
+  const countryCode = req.query.country; // country="US"
+  const searchValue = req.query.search; // search="search term"
 
   // if countryCode query parameter exists search using country code
   if (countryCode) {
@@ -55,13 +55,13 @@ router.post("/", async (req, res) => {
   const { error } = validateRecipe(req.body.recipe);
   if (error) return res.status(400).send(error.details[0].message);
 
+  // Find the country
   const country = await Country.findOne({
     code: req.body.origin_country_code.toUpperCase()
   });
   if (!country) return res.status(400).send("Invalid country.");
 
-  console.log(req.body.taste_profile);
-
+  // Find each tasteprofile, return id and name
   const tasteProfile = await TasteProfile.find({
     name: { $in: req.body.taste_profile }
   })
@@ -90,22 +90,29 @@ router.post("/", async (req, res) => {
   res.send(recipe);
 });
 
-// Put Recipe by ID(update);
+// Put Recipe by ID(update)
+// Country, title, author, and submitted_date of original recipes should not be updated.
 router.put("/:id", async (req, res) => {
   const { error } = validateRecipe(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
+  // Find each tasteprofile, return id and name
+  const tasteProfile = await TasteProfile.find({
+    name: { $in: req.body.taste_profile }
+  })
+    .select({ _id: 1, name: 1 })
+    .sort({ name: 1 });
+  if (!tasteProfile) return res.status(400).send("No taste descriptors added.");
+
+  // Update the recipe by ID
   const recipe = await Recipe.findByIdAndUpdate(
     req.params.id,
     {
-      title: req.body.title,
-      origin_country: req.body.origin_country,
-      author: req.body.author,
       last_edited: Date.now(),
       likes: req.body.likes,
       image_link: req.body.image_link,
       description: req.body.description,
-      taste_profile: req.body.taste_profile,
+      taste_profile: tasteProfile,
       ingredients: req.body.ingredients,
       instructions: req.body.instructions
     },
@@ -119,7 +126,7 @@ router.put("/:id", async (req, res) => {
 
 // Delete recipe by ID
 router.delete("/:id", async (req, res) => {
-  const recipe = await Recipes.findByIdAndRemove(req.params.id);
+  const recipe = await Recipe.findByIdAndRemove(req.params.id);
   if (!recipe)
     return res.status(404).send("The recipe with given id was not found");
 
