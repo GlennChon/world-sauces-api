@@ -3,6 +3,8 @@ const Joi = require("joi"); // Input Validation
 const config = require("config");
 const jwt = require("jsonwebtoken");
 
+const { Recipe, recipeSchema, validateRecipe } = require("./recipe");
+
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -12,17 +14,33 @@ const userSchema = new mongoose.Schema({
     min: 3,
     max: 20
   },
-  firstname: { type: String, default: "", maxlength: 50 },
-  lastname: { type: String, default: "", maxLength: 50 },
+  firstName: { type: String, default: "", maxlength: 50 },
+  lastName: { type: String, default: "", maxLength: 50 },
   about: { type: String, default: "" },
-  email: { type: String, unique: true, required: true },
+  email: {
+    type: String,
+    unique: true,
+    trim: true,
+    required: true,
+    validate: {
+      validator: function(email) {
+        const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+        const msg = "Please enter a valid email";
+
+        return emailRegex.test(email);
+      },
+      message: "Please enter a valid email."
+    }
+  },
   password: {
     type: String,
     required: true,
     minLength: 6
   },
+  registerDate: { type: Date, default: Date.now },
+  emailVerified: { type: Boolean, default: false },
   isAdmin: { type: Boolean, default: false },
-  likes: [{ types: mongoose.Schema.Types.ObjectId, ref: "Recipe" }]
+  likes: [{ types: mongoose.Schema.Types.ObjectId, ref: recipeSchema }]
 });
 
 userSchema.methods.generateAuthToken = function() {
@@ -46,7 +64,7 @@ function validateUser(user) {
       .required()
       .email(),
     password: Joi.string()
-      .regex(/^[a-zA-Z0-9]{6,16}$/)
+      .regex(/^[a-zA-Z0-9!@#$%^&*()]{6,16}$/)
       .min(6)
       .max(24)
       .required()
@@ -54,5 +72,5 @@ function validateUser(user) {
   return Joi.validate(user, schema);
 }
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model("users", userSchema);
 module.exports = { User, validateUser };
