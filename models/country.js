@@ -3,7 +3,7 @@ const Joi = require("joi");
 
 const countrySchema = new mongoose.Schema({
   name: { type: String, min: 2, max: 255 },
-  code: { type: String, min: 2, max: 2 }
+  code: { type: String, min: 2, max: 2, uppercase: true }
 });
 
 const Country = mongoose.model("countries", countrySchema);
