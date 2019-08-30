@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     unique: true,
+    lowercase: true,
     trim: true,
     required: true,
     validate: {
@@ -64,7 +65,7 @@ function validateUser(user) {
       .required()
       .email(),
     password: Joi.string()
-      .regex(/^[a-zA-Z0-9!@#$%^&*()]{6,16}$/)
+      .regex(/^[a-zA-Z0-9!@#$%^&*()]{6,24}$/)
       .min(6)
       .max(24)
       .required()
