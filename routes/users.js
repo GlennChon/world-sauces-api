@@ -5,11 +5,15 @@ const router = express.Router();
 const _ = require("lodash");
 const bcrypt = require("bcrypt");
 
-router.get("/:username", auth, async (req, res) => {
+// User //
+// Get user
+router.get("/:id", auth, async (req, res) => {
   const user = await User.findOne({
-    username: new RegExp("^" + req.params.username + "$", "i")
+    _id: req.params.id
   }).select("-password -email");
-  if (!user) return res.status(400).send("Invalid username.");
+
+  if (!user) return res.status(400).send(" No user with that id found");
+
   res.send(user);
 });
 
@@ -36,24 +40,49 @@ router.post("/", async (req, res) => {
     .send(_.pick(user, ["_id", "name", "email"]));
 });
 
-module.exports = router;
+// Put User by ID (Update)
+router.put("/:id", async (req, res) => {
+  const { error } = validateUser(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
-// Increment User Like Count
-incrementUserLikes = async user => {
-  return await user.updateOne({ $inc: { likes: 1 } });
-};
+  User.updateOne(
+    { _id: req.params.id },
+    {
+      $set: {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        about: req.body.about
+      }
+    }
+  );
+});
 
-// Decerement User Like Count
-decrementUserLikes = async user => {
-  return await user.updateOne({ $inc: { likes: -1 } });
-};
-// User //
-// Create new user
-// Get User by id
-getUserById = async id => {
-  const user = await User.findById(id);
-  if (!user) return;
-  return user;
-};
-// Update User
 // Delete User
+
+verifyEmail = async email => {
+  //
+};
+
+changeEmail = async (userId, newEmail) => {
+  // Check to see if new email exists in database
+  let user = await User.findOne({ email: newEmail });
+  // Update email and set verified back to false.
+  if (!user) {
+    User.update(
+      { _id: userId },
+      { $set: { email: newEmail, emailVerified: false } }
+    );
+  }
+};
+
+changePassword = async (userId, newPass) => {
+  user = findOne({ _id: userId });
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(newPass, salt);
+  try {
+    await user.save();
+  } catch (err) {
+    console.log(err);
+  }
+};
+module.exports = router;
