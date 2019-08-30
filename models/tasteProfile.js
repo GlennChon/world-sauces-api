@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Joi = require("joi");
 
 const tasteProfileSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  name: { type: String, required: true, uppercase: true },
   desc: { type: String, required: true },
   eg: { type: String, required: true }
 });
