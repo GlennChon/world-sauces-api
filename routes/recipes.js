@@ -1,48 +1,45 @@
 const express = require("express");
-const router = express.Router();
-
-const { Recipe, validateRecipe } = require("../models/recipe");
 const { Country } = require("../models/country");
 const { TasteProfile } = require("../models/tasteProfile");
+const { Recipe, validateRecipe } = require("../models/recipe");
 
+const router = express.Router();
 // RECIPES
 // Get list of recipes
 router.get("/", async (req, res) => {
   const pageNumber = 1;
   const pageSize = 24;
-  let findProps = {};
-  let sortProps = {};
-  const countryCode = req.query.country; // country=US
-  const searchValue = req.query.search; // search=search term
-  const userName = req.query.author; // author=worldsauces
-  const sort = req.query.sort; // sort=name
+  const findProps = formatFindProps(req);
+  const sortProps = formatSortProps(req);
 
-  const sortOptions = [
-    "title-asc",
-    "title-desc",
-    "author-asc",
-    "author-desc",
-    "likes-asc",
-    "likes-desc",
-    "country-asc",
-    "country-desc"
-  ];
+  const recipes = await Recipe.find(findProps)
+    // sort by likes desc
+    .sort(sortProps)
+    .select({
+      _id: 1,
+      title: 1,
+      author: 1,
+      taste_profile: 1,
+      origin_country: 1,
+      image_link: 1,
+      likes: 1
+    })
+    //pagination
+    .skip((pageNumber - 1) * pageSize)
+    .limit(pageSize);
+  res.send(recipes);
+});
 
-  // if countryCode query parameter exists search using country code
-  if (countryCode) {
-    const countryRegex = new RegExp(countryCode.toUpperCase(), "i");
-    findProps["origin_country.code"] = countryRegex;
-  }
-  // if searchValue query parameter exists search using search term
-  if (searchValue) {
-    const searchRegex = new RegExp(searchValue, "i");
-    findProps["title"] = searchRegex;
-  }
+// Get recipe by id
+router.get("/:id", async (req, res) => {
+  const recipe = await Recipe.findById(req.params.id);
+  if (!recipe)
+    return res.status(404).send("The recipe with given id was not found");
+  res.send(recipe);
+});
 
-  if (userName) {
-    const userNameRegex = new RegExp(userName, "i");
-    findProps["author"] = userNameRegex;
-  }
+function formatSortProps(req) {
+  const sort = req.query.sort;
 
   switch (sort) {
     case "title-asc":
@@ -72,32 +69,30 @@ router.get("/", async (req, res) => {
     default:
       sortProps["title"] = 1;
   }
+  return sortProps;
+}
 
-  const recipes = await Recipe.find(findProps)
-    // sort by likes desc
-    .sort(sortProps)
-    .select({
-      _id: 1,
-      title: 1,
-      author: 1,
-      taste_profile: 1,
-      origin_country: 1,
-      image_link: 1,
-      likes: 1
-    })
-    //pagination
-    .skip((pageNumber - 1) * pageSize)
-    .limit(pageSize);
-  res.send(recipes);
-});
+function formatFindProps(req) {
+  const countryCode = req.query.country; // country=US
+  const searchValue = req.query.search; // search=search term
+  const userName = req.query.author; // author=worldsauces
+  // if countryCode query parameter exists search using country code
+  if (countryCode) {
+    const countryRegex = new RegExp("^" + countryCode + "$", "i");
+    findProps["origin_country.code"] = countryRegex;
+  }
+  // if searchValue query parameter exists search using search term
+  if (searchValue) {
+    const searchRegex = new RegExp(searchValue, "i");
+    findProps["title"] = searchRegex;
+  }
 
-// Get recipe by id
-router.get("/:id", async (req, res) => {
-  const recipe = await Recipe.findById(req.params.id);
-  if (!recipe)
-    return res.status(404).send("The recipe with given id was not found");
-  res.send(recipe);
-});
+  if (userName) {
+    const userNameRegex = new RegExp(userName, "i");
+    findProps["author"] = userNameRegex;
+  }
+  return findProps;
+}
 
 // Post new recipe
 router.post("/", async (req, res) => {
@@ -135,8 +130,6 @@ router.post("/", async (req, res) => {
     ingredients: req.body.ingredients,
     instructions: req.body.instructions
   });
-
-  // Save recipe
   await recipe.save();
   res.send(recipe);
 });
@@ -184,13 +177,3 @@ router.delete("/:id", async (req, res) => {
 });
 
 module.exports = router;
-
-// Increment Recipe Like Count
-incrementRecipeLikes = async recipe => {
-  return recipe.updateOne({ $inc: { likes: 1 } });
-};
-
-// Decerement Recipe Like Count
-decrementRecipeLikes = async recipe => {
-  return recipe.updateOne({ $inc: { likes: -1 } });
-};
