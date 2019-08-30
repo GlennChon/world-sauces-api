@@ -1,3 +1,4 @@
+const auth = require("../middleware/auth");
 const express = require("express");
 const { Country } = require("../models/country");
 const { TasteProfile } = require("../models/tasteProfile");
@@ -95,7 +96,7 @@ function formatFindProps(req) {
 }
 
 // Post new recipe
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const { error } = validateRecipe(req.body.recipe);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -136,7 +137,7 @@ router.post("/", async (req, res) => {
 
 // Put Recipe by ID(update)
 // Country, title, author, and submitted_date of original recipes should not be updated.
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   const { error } = validateRecipe(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -168,8 +169,18 @@ router.put("/:id", async (req, res) => {
   res.send(recipe);
 });
 
+// Increment like for specific recipe
+router.put("/like", auth, async (req, res) => {
+  Recipe.updateOne({ _id: req.body._id }, { $inc: { likes: 1 } });
+});
+
+// Decrement like for specific recipe
+router.put("/unlike", auth, async (req, res) => {
+  Recipe.updateOne({ _id: req.body._id }, { $inc: { likes: -1 } });
+});
+
 // Delete recipe by ID (just here for administrative purposes.)
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", [auth, admin], async (req, res) => {
   const recipe = await Recipe.findByIdAndRemove(req.params.id);
   if (!recipe)
     return res.status(404).send("The recipe with given id was not found");
