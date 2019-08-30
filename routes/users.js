@@ -2,16 +2,39 @@ const _ = require("lodash");
 const bcrypt = require("bcrypt");
 const express = require("express");
 const auth = require("../middleware/auth");
+const admin = require("../middleware/admin");
 const { User, validateUser } = require("../models/user");
 
 const router = express.Router();
 
 // User //
+router.get("/all", [auth, admin], async (req, res) => {
+  const pageNumber = 1;
+  const pageSize = 24;
+  const users = await User.find()
+    .select("-password")
+    //pagination
+    .skip((pageNumber - 1) * pageSize)
+    .limit(pageSize);
+  res.send(recipes);
+});
+
 // Get user
-router.get("/:id", auth, async (req, res) => {
-  const user = await User.findOne({
+router.get("/me", auth, async (req, res) => {
+  const user = await User.findById({
+    _id: req.user._id
+  }).select("-password");
+
+  if (!user) return res.status(400).send(" No user with that id found");
+
+  res.send(user);
+});
+
+// Get basic public info of any user
+router.get("/:id", async (req, res) => {
+  const user = await User.findById({
     _id: req.params.id
-  }).select("-password -email");
+  }).select("-password -email -emailVerified -isAdmin -firstName -lastName");
 
   if (!user) return res.status(400).send(" No user with that id found");
 
@@ -34,17 +57,16 @@ router.post("/", async (req, res) => {
 
   const token = user.generateAuthToken();
   res
-    .header("x-auth-token", token)
+    .header("ws-auth-token", token)
     .send(_.pick(user, ["_id", "name", "email"]));
 });
 
 // Put User by ID (Update)
-router.put("/:id", async (req, res) => {
+router.put("/", auth, async (req, res) => {
   const { error } = validateUser(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-
-  User.updateOne(
-    { _id: req.params.id },
+  User.findOneAndUpdate(
+    { _id: req.user._id },
     {
       $set: {
         firstName: req.body.firstName,
@@ -55,32 +77,59 @@ router.put("/:id", async (req, res) => {
   );
 });
 
-// Delete User
+router.put("/email", auth, async (req, res) => {
+  // Check to see if new email exists in database
+  let user = await User.findOne({ email: req.body.newEmail }, { email: 1 });
+
+  // Update email and set verified back to false.
+  if (!user) {
+    User.update(
+      { _id: req.user._id },
+      { $set: { email: newEmail, emailVerified: false } }
+    );
+  }
+});
+
+// Update password
+router.put("/password", auth, async (req, res) => {
+  const user = await User.findById({
+    _id: req.user._id
+  });
+
+  if (!user) return res.status(400).send("No user associated with id.");
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(user.password, salt);
+  await user.save();
+
+  res.send(user);
+});
+
+router.put("/like", auth, async (req, res) => {
+  const user = await User.findByIdandUpdate(
+    { _id: req.user._id },
+    { $push: { likes: req.body.recipeId } }
+  );
+  res.send(user);
+});
+
+router.put("/unlike", auth, async (req, res) => {
+  const user = await User.findByIdandUpdate(
+    { _id: req.user._id },
+    { $pull: { likes: req.body.recipeId } }
+  );
+  res.send(user);
+});
+
+// Delete User: for admin only
+router.delete("/:id", [auth, admin], async (req, res) => {
+  const user = await User.findByIdAndRemove(req.params.id);
+  if (!user)
+    return res.status(404).send("The user with given id was not found");
+  res.send(user);
+});
 
 verifyEmail = async email => {
   //
 };
 
-changeEmail = async (userId, newEmail) => {
-  // Check to see if new email exists in database
-  let user = await User.findOne({ email: newEmail });
-  // Update email and set verified back to false.
-  if (!user) {
-    User.update(
-      { _id: userId },
-      { $set: { email: newEmail, emailVerified: false } }
-    );
-  }
-};
-
-changePassword = async (userId, newPass) => {
-  user = findOne({ _id: userId });
-  const salt = await bcrypt.genSalt(10);
-  user.password = await bcrypt.hash(newPass, salt);
-  try {
-    await user.save();
-  } catch (err) {
-    console.log(err);
-  }
-};
 module.exports = router;
