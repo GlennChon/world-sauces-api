@@ -27,13 +27,16 @@ npm i
 
 Will install the following dependencies
 
-- "mongoose": "^5.6.10"
-- "underscore": "^1.9.1"
-- "express": "^4.17.1"
-- "joi": "^14.3.1"
-- "config": "^3.2.2"
-- "bcrypt": "^3.0.6"
-- "jsonwebtoken": "^8.5.1"
+- "bcrypt": "^3.0.6",
+- "config": "^3.2.2",
+- "express": "^4.17.1",
+- "helmet": "^3.20.0",
+- "joi": "^14.3.1",
+- "jsonwebtoken": "^8.5.1",
+- "lodash": "^4.17.15",
+- "mongoose": "^5.6.10",
+- "morgan": "^1.9.1",
+- "winston": "^3.2.1"
 
 ### Start the Server
 
