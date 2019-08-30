@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
 const Joi = require("joi");
+const mongoose = require("mongoose");
 
 const tasteProfileSchema = new mongoose.Schema({
   name: { type: String, required: true, uppercase: true },

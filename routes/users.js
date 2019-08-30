@@ -1,9 +1,10 @@
-const auth = require("../middleware/auth");
-const { User, validateUser } = require("../models/user");
-const express = require("express");
-const router = express.Router();
 const _ = require("lodash");
 const bcrypt = require("bcrypt");
+const express = require("express");
+const auth = require("../middleware/auth");
+const { User, validateUser } = require("../models/user");
+
+const router = express.Router();
 
 // User //
 // Get user
@@ -28,11 +29,8 @@ router.post("/", async (req, res) => {
   user = new User(_.pick(req.body, ["username", "email", "password"]));
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(user.password, salt);
-  try {
-    await user.save();
-  } catch (err) {
-    console.log(err);
-  }
+
+  await user.save();
 
   const token = user.generateAuthToken();
   res

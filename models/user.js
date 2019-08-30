@@ -1,8 +1,7 @@
-const mongoose = require("mongoose");
 const Joi = require("joi"); // Input Validation
 const config = require("config");
 const jwt = require("jsonwebtoken");
-
+const mongoose = require("mongoose");
 const { Recipe, recipeSchema, validateRecipe } = require("./recipe");
 
 const userSchema = new mongoose.Schema({

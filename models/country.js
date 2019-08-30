@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
 const Joi = require("joi");
+const mongoose = require("mongoose");
 
 const countrySchema = new mongoose.Schema({
   name: { type: String, min: 2, max: 255 },

@@ -1,4 +1,3 @@
-const _ = require("underscore");
 const morgan = require("morgan");
 const config = require("config");
 const express = require("express");

@@ -1,7 +1,9 @@
 const helmet = require("helmet");
 const express = require("express");
-const error = require("../middleware/error");
 const auth = require("../middleware/auth");
+const error = require("../middleware/error");
+
+const authRoute = require("../routes/auth");
 const docsRoute = require("../routes/docs");
 const usersRoute = require("../routes/users");
 const recipesRoute = require("../routes/recipes");
@@ -15,7 +17,7 @@ module.exports = function(app) {
   app.use(helmet());
 
   app.use("/api/docs", docsRoute);
-  app.use("/api/auth", auth);
+  app.use("/api/auth", authRoute);
   app.use("/api/users", usersRoute);
   app.use("/api/recipes", recipesRoute);
   app.use("/api/countries", countriesRoute);
