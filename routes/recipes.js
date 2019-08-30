@@ -10,27 +10,76 @@ const { TasteProfile } = require("../models/tasteProfile");
 router.get("/", async (req, res) => {
   const pageNumber = 1;
   const pageSize = 24;
-  let findProperties = {};
-  const countryCode = req.query.country; // country="US"
-  const searchValue = req.query.search; // search="search term"
+  let findProps = {};
+  let sortProps = {};
+  const countryCode = req.query.country; // country=US
+  const searchValue = req.query.search; // search=search term
+  const userName = req.query.author; // author=worldsauces
+  const sort = req.query.sort; // sort=name
+
+  const sortOptions = [
+    "title-asc",
+    "title-desc",
+    "author-asc",
+    "author-desc",
+    "likes-asc",
+    "likes-desc",
+    "country-asc",
+    "country-desc"
+  ];
 
   // if countryCode query parameter exists search using country code
   if (countryCode) {
-    const countryRegex = new RegExp("^" + countryCode.toUpperCase() + "$", "i");
-    findProperties["origin_country.code"] = countryRegex;
+    const countryRegex = new RegExp(countryCode.toUpperCase(), "i");
+    findProps["origin_country.code"] = countryRegex;
   }
   // if searchValue query parameter exists search using search term
   if (searchValue) {
     const searchRegex = new RegExp(searchValue, "i");
-    findProperties["title"] = searchRegex;
+    findProps["title"] = searchRegex;
   }
 
-  const recipes = await Recipe.find(findProperties)
+  if (userName) {
+    const userNameRegex = new RegExp(userName, "i");
+    findProps["author"] = userNameRegex;
+  }
+
+  switch (sort) {
+    case "title-asc":
+      sortProps["title"] = 1;
+      break;
+    case "title-desc":
+      sortProps["title"] = -1;
+      break;
+    case "author-asc":
+      sortProps["author"] = 1;
+      break;
+    case "author-desc":
+      sortProps["author"] = -1;
+      break;
+    case "likes-asc":
+      sortProps["likes"] = 1;
+      break;
+    case "likes-desc":
+      sortProps["likes"] = -1;
+      break;
+    case "country-asc":
+      sortProps["origin_country.name"] = 1;
+      break;
+    case "country-desc":
+      sortProps["origin_country.name"] = -1;
+      break;
+    default:
+      sortProps["title"] = 1;
+  }
+
+  const recipes = await Recipe.find(findProps)
     // sort by likes desc
-    .sort({ likes: -1 })
+    .sort(sortProps)
     .select({
       _id: 1,
       title: 1,
+      author: 1,
       taste_profile: 1,
       origin_country: 1,
       image_link: 1,
@@ -69,7 +118,7 @@ router.post("/", async (req, res) => {
     .sort({ name: 1 });
   if (!tasteProfile) return res.status(400).send("No taste descriptors added.");
 
-  let recipe = new Recipe({
+  const recipe = new Recipe({
     title: req.body.title,
     origin_country: {
       _id: country._id,
@@ -86,7 +135,9 @@ router.post("/", async (req, res) => {
     ingredients: req.body.ingredients,
     instructions: req.body.instructions
   });
-  recipe = await recipe.save();
+
+  // Save recipe
+  await recipe.save();
   res.send(recipe);
 });
 
@@ -124,12 +175,11 @@ router.put("/:id", async (req, res) => {
   res.send(recipe);
 });
 
-// Delete recipe by ID
+// Delete recipe by ID (just here for administrative purposes.)
 router.delete("/:id", async (req, res) => {
   const recipe = await Recipe.findByIdAndRemove(req.params.id);
   if (!recipe)
     return res.status(404).send("The recipe with given id was not found");
-
   res.send(recipe);
 });
 
