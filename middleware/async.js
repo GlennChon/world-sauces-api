@@ -3,6 +3,7 @@ module.exports = function(handler) {
     try {
       await handler(req, res);
     } catch (ex) {
+      console.log(ex.errors[field].message);
       next(ex);
     }
   };
