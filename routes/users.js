@@ -25,7 +25,7 @@ router.get("/me", auth, async (req, res) => {
     _id: req.user._id
   }).select("-password");
 
-  if (!user) return res.status(400).send(" No user with that id found");
+  if (!user) return res.status(400).send("No user with that id found");
 
   res.send(user);
 });
@@ -36,7 +36,7 @@ router.get("/:id", async (req, res) => {
     _id: req.params.id
   }).select("-password -email -emailVerified -isAdmin -firstName -lastName");
 
-  if (!user) return res.status(400).send(" No user with that id found");
+  if (!user) return res.status(400).send("No user with that id found");
 
   res.send(user);
 });
@@ -47,7 +47,16 @@ router.post("/", async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   let user = await User.findOne({ email: req.body.email });
-  if (user) return res.status(400).send("User already registered.");
+  if (user)
+    return res
+      .status(400)
+      .send({ ex: "Email", message: "Email already registered." });
+
+  user = await User.findOne({ username: req.body.username });
+  if (user)
+    return res
+      .status(400)
+      .send({ ex: "Username", message: "Username already registered." });
 
   user = new User(_.pick(req.body, ["username", "email", "password"]));
   const salt = await bcrypt.genSalt(10);
@@ -58,7 +67,7 @@ router.post("/", async (req, res) => {
   const token = user.generateAuthToken();
   res
     .header("ws-auth-token", token)
-    .send(_.pick(user, ["_id", "name", "email"]));
+    .send(_.pick(user, ["_id", "username", "email"]));
 });
 
 // Put User by ID (Update)
