@@ -11,15 +11,7 @@ const recipeSchema = new mongoose.Schema({
   likes: { type: Number, default: 1 },
   image_link: { type: String, default: "", trim: true },
   description: { type: String, default: "" },
-  taste_profile: {
-    type: Array,
-    validate: {
-      validator: function(v) {
-        return v && v.length > 0;
-      },
-      message: "A recipe should have at least 1 taste descriptor."
-    }
-  },
+  taste_profile: { type: Array },
   ingredients: {
     type: Array,
     validate: {
@@ -48,17 +40,19 @@ function validateRecipe(recipe) {
   const schema = {
     title: Joi.string()
       .min(2)
-      .max(255),
+      .max(255)
+      .required(),
     origin_country_code: Joi.string()
       .max(2)
-      .min(2),
-    author: Joi.string(),
+      .min(2)
+      .required(),
+    author: Joi.string().required(),
     likes: Joi.number().integer(),
     image_link: Joi.string(),
     description: Joi.string(),
     taste_profile: Joi.array().items(Joi.string()),
-    ingredients: Joi.array().items(Joi.string()),
-    instructions: Joi.array().items(Joi.string())
+    ingredients: Joi.array().items(Joi.string().required()),
+    instructions: Joi.array().items(Joi.string().required())
   };
   return Joi.validate(recipe, schema);
 }
