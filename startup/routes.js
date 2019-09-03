@@ -1,6 +1,6 @@
+const cors = require("cors");
 const helmet = require("helmet");
 const express = require("express");
-const auth = require("../middleware/auth");
 const error = require("../middleware/error");
 
 const authRoute = require("../routes/auth");
@@ -11,6 +11,7 @@ const countriesRoute = require("../routes/countries");
 const tasteProfilesRoute = require("../routes/tasteProfiles");
 
 module.exports = function(app) {
+  app.use(cors());
   app.use(express.json());
   app.use(express.static("public")); // serve public folder
   app.use(express.urlencoded({ extended: true }));
