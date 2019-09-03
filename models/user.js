@@ -21,16 +21,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
     trim: true,
-    required: true,
-    validate: {
-      validator: function(email) {
-        const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-        const msg = "Please enter a valid email";
-
-        return emailRegex.test(email);
-      },
-      message: "Please enter a valid email."
-    }
+    required: true
   },
   password: {
     type: String,
@@ -45,7 +36,12 @@ const userSchema = new mongoose.Schema({
 
 userSchema.methods.generateAuthToken = function() {
   return jwt.sign(
-    { _id: this._id, isAdmin: this.isAdmin },
+    {
+      _id: this._id,
+      username: this.username,
+      email: this.email,
+      isAdmin: this.isAdmin
+    },
     config.get("jwtPrivateKey")
   );
 };
@@ -54,8 +50,7 @@ userSchema.methods.generateAuthToken = function() {
 function validateUser(user) {
   const schema = {
     username: Joi.string()
-      .alphanum()
-      .min(5)
+      .min(3)
       .max(16)
       .required(),
     email: Joi.string()
@@ -64,7 +59,6 @@ function validateUser(user) {
       .required()
       .email(),
     password: Joi.string()
-      .regex(/^[a-zA-Z0-9!@#$%^&*()]{6,24}$/)
       .min(6)
       .max(24)
       .required()
