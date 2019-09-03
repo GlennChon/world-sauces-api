@@ -1,4 +1,5 @@
 const auth = require("../middleware/auth");
+const admin = require("../middleware/admin");
 const express = require("express");
 const { Country } = require("../models/country");
 const { TasteProfile } = require("../models/tasteProfile");
@@ -31,6 +32,31 @@ router.get("/", async (req, res) => {
   res.send(recipes);
 });
 
+router.get("/random", async (req, res) => {
+  const recipes = await Recipe.aggregate([{ $sample: { size: 24 } }]);
+  res.send(recipes);
+});
+
+router.get("/popular", async (req, res) => {
+  const pageNumber = 1;
+  const pageSize = 24;
+  const recipes = await Recipe.find()
+    // sort by likes desc
+    .sort({ likes: -1 })
+    .select({
+      _id: 1,
+      title: 1,
+      author: 1,
+      taste_profile: 1,
+      origin_country: 1,
+      image_link: 1,
+      likes: 1
+    })
+    //pagination
+    .skip((pageNumber - 1) * pageSize)
+    .limit(pageSize);
+  res.send(recipes);
+});
 // Get recipe by id
 router.get("/:id", async (req, res) => {
   const recipe = await Recipe.findById(req.params.id);
@@ -41,25 +67,25 @@ router.get("/:id", async (req, res) => {
 
 function formatSortProps(req) {
   const sort = req.query.sort;
-
+  let sortProps = {};
   switch (sort) {
     case "title-asc":
-      sortProps["title"] = 1;
+      sortProps.title = 1;
       break;
     case "title-desc":
-      sortProps["title"] = -1;
+      sortProps.title = -1;
       break;
     case "author-asc":
-      sortProps["author"] = 1;
+      sortProps.author = 1;
       break;
     case "author-desc":
-      sortProps["author"] = -1;
+      sortProps.author = -1;
       break;
     case "likes-asc":
-      sortProps["likes"] = 1;
+      sortProps.likes = 1;
       break;
     case "likes-desc":
-      sortProps["likes"] = -1;
+      sortProps.likes = -1;
       break;
     case "country-asc":
       sortProps["origin_country.name"] = 1;
@@ -68,7 +94,7 @@ function formatSortProps(req) {
       sortProps["origin_country.name"] = -1;
       break;
     default:
-      sortProps["title"] = 1;
+      sortProps.title = 1;
   }
   return sortProps;
 }
@@ -77,21 +103,22 @@ function formatFindProps(req) {
   const countryCode = req.query.country; // country=US
   const searchValue = req.query.search; // search=search term
   const userName = req.query.author; // author=worldsauces
+  let findProps = {};
+  // if searchValue query parameter exists search using search term
+  if (searchValue) {
+    const searchRegex = new RegExp(searchValue, "i");
+    findProps.title = searchRegex;
+  }
   // if countryCode query parameter exists search using country code
   if (countryCode) {
     const countryRegex = new RegExp("^" + countryCode + "$", "i");
     findProps["origin_country.code"] = countryRegex;
   }
-  // if searchValue query parameter exists search using search term
-  if (searchValue) {
-    const searchRegex = new RegExp(searchValue, "i");
-    findProps["title"] = searchRegex;
-  }
-
   if (userName) {
     const userNameRegex = new RegExp(userName, "i");
-    findProps["author"] = userNameRegex;
+    findProps.author = userNameRegex;
   }
+  console.log(findProps);
   return findProps;
 }
 
