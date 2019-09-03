@@ -14,14 +14,14 @@ router.post("/", async (req, res) => {
 
   // Check if user exists
   // By email
-  let user = await User.findOne({ email: req.body.user });
+  let user = await User.findOne({ email: req.body.username });
   // By username
   if (!user) {
-    const usernameRegex = new RegExp("^" + req.body.user + "$", "i");
+    const usernameRegex = new RegExp("^" + req.body.username + "$", "i");
     user = await User.findOne({ username: usernameRegex });
   }
   // No result
-  if (!user) return res.status(400).send("Invalid email or password");
+  if (!user) return res.status(400).send("Invalid username or password");
 
   // Check if password matches
   const validPassword = await bcrypt.compare(req.body.password, user.password);
@@ -34,12 +34,10 @@ router.post("/", async (req, res) => {
 // Joi validation
 function validate(req) {
   const schema = {
-    user: Joi.string()
-      .min(5)
+    username: Joi.string()
       .max(255)
       .required(),
     password: Joi.string()
-      .min(5)
       .max(1024)
       .required()
   };
