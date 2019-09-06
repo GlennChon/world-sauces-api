@@ -50,9 +50,23 @@ function validateRecipe(recipe) {
     likes: Joi.number().integer(),
     image_link: Joi.string(),
     description: Joi.string(),
-    taste_profile: Joi.array().items(Joi.string()),
-    ingredients: Joi.array().items(Joi.string().required()),
-    instructions: Joi.array().items(Joi.string().required())
+    taste_profile: Joi.array()
+      .items(Joi.string())
+      .min(1),
+    ingredients: [
+      Joi.object()
+        .keys({
+          value: Joi.string().min(3)
+        })
+        .min(2)
+    ],
+    instructions: [
+      Joi.object()
+        .keys({
+          value: Joi.string().min(3)
+        })
+        .min(1)
+    ]
   };
   return Joi.validate(recipe, schema);
 }
