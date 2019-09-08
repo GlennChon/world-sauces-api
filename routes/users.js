@@ -23,7 +23,7 @@ router.get("/all", [auth, admin], async (req, res) => {
 router.get("/me", auth, async (req, res) => {
   const user = await User.findById({
     _id: req.user._id
-  }).select("-password");
+  }).select("-password -isAdmin");
 
   if (!user) return res.status(400).send("No user with that id found");
 
