@@ -32,6 +32,13 @@ router.get("/", async (req, res) => {
   res.send(recipes);
 });
 
+router.get("/likes", async (req, res) => {
+  const recipes = await Recipe.find({
+    _id: { $in: req.likes }
+  }).sort({ title: 1 });
+  res.send(recipes);
+});
+
 router.get("/random", async (req, res) => {
   const recipes = await Recipe.aggregate([{ $sample: { size: 24 } }]);
   res.send(recipes);
@@ -57,9 +64,10 @@ router.get("/popular", async (req, res) => {
     .limit(pageSize);
   res.send(recipes);
 });
+
 // Get recipe by id
 router.get("/:id", async (req, res) => {
-  const recipe = await Recipe.findById(req.params.id);
+  const recipe = await Recipe.findById(req.params.id).select("-__v");
   if (!recipe)
     return res.status(404).send("The recipe with given id was not found");
   res.send(recipe);
@@ -100,7 +108,7 @@ function formatSortProps(req) {
 }
 
 function formatFindProps(req) {
-  const countryCode = req.query.country; // country=US
+  const countryName = req.query.country; // country=US
   const searchValue = req.query.search; // search=search term
   const userName = req.query.author; // author=worldsauces
   let findProps = {};
@@ -109,16 +117,16 @@ function formatFindProps(req) {
     const searchRegex = new RegExp(searchValue, "i");
     findProps.title = searchRegex;
   }
-  // if countryCode query parameter exists search using country code
-  if (countryCode) {
-    const countryRegex = new RegExp("^" + countryCode + "$", "i");
-    findProps["origin_country.code"] = countryRegex;
+  // if countryCode query parameter exists search using country name
+  if (countryName) {
+    coutryName = countryName.replace("%20", " ");
+    const countryRegex = new RegExp("^" + countryName + "$", "i");
+    findProps["origin_country"] = countryRegex;
   }
   if (userName) {
     const userNameRegex = new RegExp(userName, "i");
     findProps.author = userNameRegex;
   }
-  console.log(findProps);
   return findProps;
 }
 
@@ -127,34 +135,16 @@ router.post("/", auth, async (req, res) => {
   const { error } = validateRecipe(req.body.recipe);
   if (error) return res.status(400).send(error.details[0].message);
 
-  // Find the country
-  const country = await Country.findOne({
-    code: req.body.origin_country_code.toUpperCase()
-  });
-  if (!country) return res.status(400).send("Invalid country.");
-
-  // Find each tasteprofile, return id and name
-  const tasteProfile = await TasteProfile.find({
-    name: { $in: req.body.taste_profile }
-  })
-    .select({ _id: 1, name: 1 })
-    .sort({ name: 1 });
-  if (!tasteProfile) return res.status(400).send("No taste descriptors added.");
-
   const recipe = new Recipe({
     title: req.body.title,
-    origin_country: {
-      _id: country._id,
-      name: country.name,
-      code: country.code
-    },
+    origin_country: req.body.origin_country,
     author: req.body.author,
     submitted_date: Date.now(),
     last_edited: Date.now(),
     likes: req.body.likes,
     image_link: req.body.image_link,
     description: req.body.description,
-    taste_profile: tasteProfile,
+    taste_profile: req.body.taste_profile,
     ingredients: req.body.ingredients,
     instructions: req.body.instructions
   });
@@ -163,28 +153,22 @@ router.post("/", auth, async (req, res) => {
 });
 
 // Put Recipe by ID(update)
-// Country, title, author, and submitted_date of original recipes should not be updated.
+// Country, author, likes, and submitted_date of original recipes should not be updated here
 router.put("/:id", auth, async (req, res) => {
   const { error } = validateRecipe(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-
-  // Find each tasteprofile, return id and name
-  const tasteProfile = await TasteProfile.find({
-    name: { $in: req.body.taste_profile }
-  })
-    .select({ _id: 1, name: 1 })
-    .sort({ name: 1 });
-  if (!tasteProfile) return res.status(400).send("No taste descriptors added.");
+  if (!req.body.taste_profile)
+    return res.status(400).send("No taste descriptors added.");
 
   // Update the recipe by ID
   const recipe = await Recipe.findByIdAndUpdate(
     req.params.id,
     {
+      title: req.body.title,
       last_edited: Date.now(),
-      likes: req.body.likes,
       image_link: req.body.image_link,
       description: req.body.description,
-      taste_profile: tasteProfile,
+      taste_profile: req.body.taste_profile,
       ingredients: req.body.ingredients,
       instructions: req.body.instructions
     },
