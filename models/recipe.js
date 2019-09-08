@@ -4,7 +4,7 @@ const { Country, countrySchema, validateCountry } = require("./country");
 
 const recipeSchema = new mongoose.Schema({
   title: { type: String, min: 2, max: 255, required: true, trim: true },
-  origin_country: countrySchema,
+  origin_country: { type: String, required: true },
   author: { type: String, required: true },
   submitted_date: { type: Date, default: Date.now },
   last_edited: { type: Date, default: Date.now },
@@ -16,9 +16,9 @@ const recipeSchema = new mongoose.Schema({
     type: Array,
     validate: {
       validator: function(v) {
-        return v && v.length > 1;
+        return v && v.length > 0;
       },
-      message: "A recipe should have at least 2 ingredient."
+      message: "A recipe should have at least 1 ingredient."
     }
   },
   instructions: {
@@ -42,9 +42,9 @@ function validateRecipe(recipe) {
       .min(2)
       .max(255)
       .required(),
-    origin_country_code: Joi.string()
-      .max(2)
+    origin_country: Joi.string()
       .min(2)
+      .max(50)
       .required(),
     author: Joi.string().required(),
     likes: Joi.number().integer(),
@@ -53,20 +53,20 @@ function validateRecipe(recipe) {
     taste_profile: Joi.array()
       .items(Joi.string())
       .min(1),
-    ingredients: [
-      Joi.object()
-        .keys({
-          value: Joi.string().min(3)
-        })
-        .min(2)
-    ],
-    instructions: [
+    ingredients: Joi.array().items(
       Joi.object()
         .keys({
           value: Joi.string().min(3)
         })
         .min(1)
-    ]
+    ),
+    instructions: Joi.array().items(
+      Joi.object()
+        .keys({
+          value: Joi.string().min(3)
+        })
+        .min(1)
+    )
   };
   return Joi.validate(recipe, schema);
 }
