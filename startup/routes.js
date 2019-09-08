@@ -16,6 +16,7 @@ module.exports = function(app) {
   app.use(express.static("public")); // serve public folder
   app.use(express.urlencoded({ extended: true }));
   app.use(helmet());
+  app.use(error);
 
   app.use("/api/docs", docsRoute);
   app.use("/api/auth", authRoute);
@@ -23,6 +24,4 @@ module.exports = function(app) {
   app.use("/api/recipes", recipesRoute);
   app.use("/api/countries", countriesRoute);
   app.use("/api/tasteprofiles", tasteProfilesRoute);
-
-  app.use(error);
 };
