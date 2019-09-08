@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
   registerDate: { type: Date, default: Date.now },
   emailVerified: { type: Boolean, default: false },
   isAdmin: { type: Boolean, default: false },
-  likes: [{ types: mongoose.Schema.Types.ObjectId, ref: recipeSchema }]
+  likes: { type: Array }
 });
 
 userSchema.methods.generateAuthToken = function() {
