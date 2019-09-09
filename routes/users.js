@@ -12,21 +12,19 @@ router.get("/all", [auth, admin], async (req, res) => {
   const pageNumber = 1;
   const pageSize = 24;
   const users = await User.find()
-    .select("-password")
+    .select("-password -email -firstname -lastname")
     //pagination
     .skip((pageNumber - 1) * pageSize)
     .limit(pageSize);
-  res.send(recipes);
+  res.send(users);
 });
 
 // Get user
-router.get("/me", auth, async (req, res) => {
-  const user = await User.findById({
-    _id: req.user._id
-  }).select("-password -isAdmin");
-
+router.post("/me", auth, async (req, res) => {
+  const user = await User.findOne({ username: req.body.username }).select(
+    "-password -isAdmin"
+  );
   if (!user) return res.status(400).send("No user with that id found");
-
   res.send(user);
 });
 
@@ -34,7 +32,9 @@ router.get("/me", auth, async (req, res) => {
 router.get("/:id", async (req, res) => {
   const user = await User.findById({
     _id: req.params.id
-  }).select("-password -email -emailVerified -isAdmin -firstName -lastName");
+  }).select(
+    "-password -email -emailVerified -isAdmin -likes -firstName -lastName"
+  );
 
   if (!user) return res.status(400).send("No user with that id found");
 
