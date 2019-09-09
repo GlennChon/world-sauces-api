@@ -1,6 +1,5 @@
 const Joi = require("joi");
 const mongoose = require("mongoose");
-const { Country, countrySchema, validateCountry } = require("./country");
 
 const recipeSchema = new mongoose.Schema({
   title: { type: String, min: 2, max: 255, required: true, trim: true },
