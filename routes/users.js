@@ -5,6 +5,10 @@ const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const { User, validateUser } = require("../models/user");
 
+const mongoose = require("mongoose");
+const Fawn = require("fawn");
+
+Fawn.init(mongoose);
 const router = express.Router();
 
 // User //
@@ -19,7 +23,7 @@ router.get("/all", [auth, admin], async (req, res) => {
   res.send(users);
 });
 
-// Get user
+// Post to get user info
 router.post("/me", auth, async (req, res) => {
   const user = await User.findOne({ username: req.body.username }).select(
     "-password -isAdmin"
@@ -114,19 +118,53 @@ router.put("/password", auth, async (req, res) => {
 });
 
 router.put("/like", auth, async (req, res) => {
-  const user = await User.findByIdandUpdate(
-    { _id: req.user._id },
-    { $push: { likes: req.body.recipeId } }
+  console.log(
+    "Adding userid: " + req.body.userId + " recipeId: " + req.body.recipeId
   );
-  res.send(user);
+  let user = await User.findById(req.body.userId).select(
+    "-password -email -emailVerified -isAdmin -firstName -lastName"
+  );
+  if (!user) return res.status(400).send("No user by that id");
+
+  new Fawn.Task()
+    .update(
+      "users",
+      { _id: req.body.userId },
+      { $push: { likes: { _id: req.body.recipeId } } }
+    )
+    .update("recipes", { _id: req.body.recipeId }, { $inc: { likes: 1 } })
+    .run({ useMongoose: true })
+    .then(function(results) {
+      const userResult = results[0];
+      res.send(userResult);
+    })
+    .catch(function(ex) {
+      res.status(500).send(ex.message);
+    });
 });
 
 router.put("/unlike", auth, async (req, res) => {
-  const user = await User.findByIdandUpdate(
-    { _id: req.user._id },
-    { $pull: { likes: req.body.recipeId } }
+  let user = await User.findById({ _id: req.body.userId }).select(
+    "-password -email -emailVerified -isAdmin -firstName -lastName"
   );
-  res.send(user);
+  console.log(user);
+  if (!user) return res.status(400).send("No user by that id");
+
+  new Fawn.Task()
+    .update(
+      "users",
+      { _id: req.body.userId },
+      { $pull: { likes: req.body.recipeId } }
+    )
+    .update("recipes", { _id: req.body.recipeId }, { $inc: { likes: -1 } })
+    .run({ useMongoose: true })
+    .then(function(results) {
+      const userResult = results[0];
+      res.send(userResult);
+    })
+    .catch(function(ex) {
+      res.status(500).send(ex.message);
+    });
 });
 
 // Delete User: for admin only
