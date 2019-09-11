@@ -33,14 +33,12 @@ router.post("/me", auth, async (req, res) => {
 });
 
 // Get basic public info of any user
-router.get("/:id", async (req, res) => {
-  const user = await User.findById({
-    _id: req.params.id
-  }).select(
+router.get("/:username", async (req, res) => {
+  const user = await User.findOne({ username: req.params.username }).select(
     "-password -email -emailVerified -isAdmin -likes -firstName -lastName"
   );
 
-  if (!user) return res.status(400).send("No user with that id found");
+  if (!user) return res.status(400).send("No user with that username found");
 
   res.send(user);
 });
