@@ -77,11 +77,12 @@ router.put("/", auth, async (req, res) => {
   const { error } = validateUser(req.body);
   if (error) return res.status(400).send(error.details[0].message);
   User.findOneAndUpdate(
-    { _id: req.user._id },
+    { _id: req.body._id },
     {
       $set: {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
+        email: req.body.email,
         about: req.body.about
       }
     }
