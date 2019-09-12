@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
   },
   firstName: { type: String, default: "", maxlength: 50 },
   lastName: { type: String, default: "", maxLength: 50 },
-  about: { type: String, default: "" },
+  about: { type: String, default: "", maxLength: 1000 },
   email: {
     type: String,
     unique: true,
