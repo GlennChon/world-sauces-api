@@ -45,6 +45,26 @@ userSchema.methods.generateAuthToken = function() {
     config.get("jwtPrivateKey")
   );
 };
+function validateUserUpdate(user) {
+  const schema = {
+    _id: Joi.string(),
+    firstName: Joi.string()
+      .allow("", null)
+      .max(50),
+    lastName: Joi.string()
+      .allow("", null)
+      .max(50),
+    about: Joi.string()
+      .allow("", null)
+      .max(1000),
+    email: Joi.string()
+      .min(5)
+      .max(255)
+      .required()
+      .email()
+  };
+  return Joi.validate(user, schema);
+}
 
 // Joi validation
 function validateUser(user) {
@@ -61,10 +81,16 @@ function validateUser(user) {
     password: Joi.string()
       .min(6)
       .max(24)
-      .required()
+      .required(),
+    firstName: Joi.string()
+      .allow("", null)
+      .max(50),
+    lastName: Joi.string()
+      .allow("", null)
+      .max(50)
   };
   return Joi.validate(user, schema);
 }
 
 const User = mongoose.model("users", userSchema);
-module.exports = { User, validateUser };
+module.exports = { User, validateUser, validateUserUpdate };
