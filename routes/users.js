@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
-const { User, validateUser } = require("../models/user");
+const { User, validateUser, validateUserUpdate } = require("../models/user");
 
 const mongoose = require("mongoose");
 const Fawn = require("fawn");
@@ -73,20 +73,25 @@ router.post("/", async (req, res) => {
 });
 
 // Put User by ID (Update)
-router.put("/", auth, async (req, res) => {
-  const { error } = validateUser(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-  User.findOneAndUpdate(
-    { _id: req.body._id },
-    {
-      $set: {
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        email: req.body.email,
-        about: req.body.about
+router.put("/me", auth, async (req, res) => {
+  try {
+    const { error } = validateUserUpdate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+    const result = await User.findOneAndUpdate(
+      { _id: req.body._id },
+      {
+        $set: {
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
+          email: req.body.email,
+          about: req.body.about
+        }
       }
-    }
-  );
+    ).select("-password");
+    res.send(result);
+  } catch (ex) {
+    res.status(500).send(ex.message);
+  }
 });
 
 router.put("/email", auth, async (req, res) => {
@@ -117,9 +122,6 @@ router.put("/password", auth, async (req, res) => {
 });
 
 router.put("/like", auth, async (req, res) => {
-  console.log(
-    "Adding userid: " + req.body.userId + " recipeId: " + req.body.recipeId
-  );
   let user = await User.findById(req.body.userId).select(
     "-password -email -emailVerified -isAdmin -firstName -lastName"
   );
