@@ -32,9 +32,10 @@ router.get("/", async (req, res) => {
   res.send(recipes);
 });
 
-router.get("/likes", async (req, res) => {
+// get recipes based on array
+router.post("/likes", async (req, res) => {
   const recipes = await Recipe.find({
-    _id: { $in: req.likes }
+    _id: { $in: req.body.likes }
   }).sort({ title: 1 });
   res.send(recipes);
 });
