@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["mongod", "npm", "start", "mongorestore -r world_sauces ./data/db/world_sauces"]
