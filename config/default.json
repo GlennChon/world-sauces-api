@@ -2,5 +2,6 @@
   "name": "World Sauces App",
   "jwtPrivateKey": "unsecureKey",
   "port": "3000",
-  "db": "mongodb://localhost:27017/world_sauces"
+  "db": "mongodb://localhost:27017/world_sauces",
+  "requiresAuth": true
 }
