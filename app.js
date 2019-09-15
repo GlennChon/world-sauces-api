@@ -15,6 +15,7 @@ if (app.get("env") === "development") {
 
 // require("./startup/logging")();
 require("./startup/db")();
+require("./startup/populate_data")();
 require("./startup/routes")(app);
 // require("./startup/config")();
 // require("./startup/validation")();

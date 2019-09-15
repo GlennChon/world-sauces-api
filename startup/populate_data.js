@@ -1,9 +1,14 @@
+
+const assert = require('assert');
+
+const countries = require('../data/countries.json');
+const tasteProfiles = require('../data/tasteProfiles.json');
+const recipes = require('../data/recipes.json');
 const { Country } = require("../models/country");
 const { TasteProfile } = require("../models/tasteProfile");
 const { Recipe } = require("../models/recipe");
-const assert = require('assert')
 
-module.exports = function(){
+module.exports = function populate_data(){
 
     const countryCount = await Country.count();
     if (countryCount < 1){
