@@ -25,8 +25,5 @@ module.exports = async function() {
 };
 
 async function importData(model, data) {
-  await model.collection.insertMany(data, function(err, r) {
-    assert.equal(null, err);
-    assert.equal(3, r.insertedCount);
-  });
+  await model.collection.insertMany(data);
 }
