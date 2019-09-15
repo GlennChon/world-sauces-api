@@ -7,7 +7,7 @@ const { Country } = require("../models/country");
 const { TasteProfile } = require("../models/tasteProfile");
 const { Recipe } = require("../models/recipe");
 
-module.exports = async function populate_data() {
+module.exports = async function() {
   const countryCount = await Country.count();
   if (countryCount < 1) {
     importData(Country, countries);
