@@ -3,5 +3,6 @@
     "password": "mail_server_password"
   },
 
-  "jwtPrivateKey": "jwt_private_key"
+  "jwtPrivateKey": "jwt_private_key",
+  "db": "ws_db"
 }

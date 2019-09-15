@@ -3,5 +3,6 @@
   "mail": {
     "host": "dev-mail-server"
   },
+  "requiresAuth": false,
   "db": "mongodb://localhost:27017/world_sauces"
 }
