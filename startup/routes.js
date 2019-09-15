@@ -15,7 +15,6 @@ module.exports = function(app) {
   app.use(express.json());
   app.use(express.static("public")); // serve public folder
   app.use(express.urlencoded({ extended: true }));
-  app.use(helmet());
   app.use(error);
 
   app.use("/api/docs", docsRoute);
