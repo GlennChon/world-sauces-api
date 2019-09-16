@@ -136,7 +136,7 @@ router.put("/like", auth, async (req, res) => {
     )
     .updateOne("recipes", { _id: req.body.recipeId }, { $inc: { likes: 1 } })
     .run({ useMongoose: true })
-    .then(function() {
+    .then(async function() {
       const recipe = await Recipe.findById({ _id: req.body.recipeId });
       res.send(recipe);
     })
@@ -159,7 +159,7 @@ router.put("/unlike", auth, async (req, res) => {
     )
     .updateOne("recipes", { _id: req.body.recipeId }, { $inc: { likes: -1 } })
     .run({ useMongoose: true })
-    .then(function() {
+    .then(async function() {
       const recipe = await Recipe.findById({ _id: req.body.recipeId });
       res.send(recipe);
     })
