@@ -129,12 +129,12 @@ router.put("/like", auth, async (req, res) => {
   if (!user) return res.status(400).send("No user by that id");
 
   new Fawn.Task()
-    .updateOne(
+    .update(
       "users",
       { _id: req.body.userId },
       { $push: { likes: { _id: req.body.recipeId } } }
     )
-    .updateOne("recipes", { _id: req.body.recipeId }, { $inc: { likes: 1 } })
+    .update("recipes", { _id: req.body.recipeId }, { $inc: { likes: 1 } })
     .run({ useMongoose: true })
     .then(async function() {
       const recipe = await Recipe.findById({ _id: req.body.recipeId });
@@ -152,12 +152,12 @@ router.put("/unlike", auth, async (req, res) => {
   if (!user) return res.status(400).send("No user by that id");
 
   new Fawn.Task()
-    .updateOne(
+    .update(
       "users",
       { _id: req.body.userId },
       { $pull: { likes: req.body.recipeId } }
     )
-    .updateOne("recipes", { _id: req.body.recipeId }, { $inc: { likes: -1 } })
+    .update("recipes", { _id: req.body.recipeId }, { $inc: { likes: -1 } })
     .run({ useMongoose: true })
     .then(async function() {
       const recipe = await Recipe.findById({ _id: req.body.recipeId });
