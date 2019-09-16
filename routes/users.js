@@ -129,15 +129,15 @@ router.put("/like", auth, async (req, res) => {
   if (!user) return res.status(400).send("No user by that id");
 
   new Fawn.Task()
-    .update(
+    .updateOne(
       "users",
       { _id: req.body.userId },
       { $push: { likes: { _id: req.body.recipeId } } }
     )
-    .update("recipes", { _id: req.body.recipeId }, { $inc: { likes: 1 } })
+    .updateOne("recipes", { _id: req.body.recipeId }, { $inc: { likes: 1 } })
     .run({ useMongoose: true })
     .then(function() {
-      const recipe = Recipe.findById({ _id: req.body.recipeId });
+      const recipe = await Recipe.findById({ _id: req.body.recipeId });
       res.send(recipe);
     })
     .catch(function(ex) {
@@ -149,19 +149,18 @@ router.put("/unlike", auth, async (req, res) => {
   let user = await User.findById({ _id: req.body.userId }).select(
     "-password -email -emailVerified -isAdmin -firstName -lastName"
   );
-  console.log(user);
   if (!user) return res.status(400).send("No user by that id");
 
   new Fawn.Task()
-    .update(
+    .updateOne(
       "users",
       { _id: req.body.userId },
       { $pull: { likes: req.body.recipeId } }
     )
-    .update("recipes", { _id: req.body.recipeId }, { $inc: { likes: -1 } })
+    .updateOne("recipes", { _id: req.body.recipeId }, { $inc: { likes: -1 } })
     .run({ useMongoose: true })
     .then(function() {
-      const recipe = Recipe.findById({ _id: req.body.recipeId });
+      const recipe = await Recipe.findById({ _id: req.body.recipeId });
       res.send(recipe);
     })
     .catch(function(ex) {
