@@ -135,9 +135,9 @@ router.put("/like", auth, async (req, res) => {
     )
     .update("recipes", { _id: req.body.recipeId }, { $inc: { likes: 1 } })
     .run({ useMongoose: true })
-    .then(function(results) {
-      const recipeResult = results[1];
-      res.send(recipeResult);
+    .then(function() {
+      const recipe = Recipe.findById({ _id: req.body.recipeId });
+      res.send(recipe);
     })
     .catch(function(ex) {
       res.status(500).send(ex.message);
@@ -159,9 +159,9 @@ router.put("/unlike", auth, async (req, res) => {
     )
     .update("recipes", { _id: req.body.recipeId }, { $inc: { likes: -1 } })
     .run({ useMongoose: true })
-    .then(function(results) {
-      const recipeResult = results[1];
-      res.send(recipeResult);
+    .then(function() {
+      const recipe = Recipe.findById({ _id: req.body.recipeId });
+      res.send(recipe);
     })
     .catch(function(ex) {
       res.status(500).send(ex.message);
