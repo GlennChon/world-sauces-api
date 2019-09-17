@@ -3,7 +3,12 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
-const { User, validateUser, validateUserUpdate } = require("../models/user");
+const {
+  User,
+  validateUser,
+  validateUserUpdate,
+  validateAccountUpdate
+} = require("../models/user");
 const { Recipe } = require("../models/recipe");
 
 const mongoose = require("mongoose");
@@ -84,7 +89,6 @@ router.put("/me", auth, async (req, res) => {
         $set: {
           firstName: req.body.firstName,
           lastName: req.body.lastName,
-          email: req.body.email,
           about: req.body.about
         }
       }
@@ -95,33 +99,53 @@ router.put("/me", auth, async (req, res) => {
   }
 });
 
-router.put("/email", auth, async (req, res) => {
-  // Check to see if new email exists in database
-  let user = await User.findOne({ email: req.body.newEmail }, { email: 1 });
+// Update password and email
+router.put("/account", auth, async (req, res) => {
+  const { error } = validateAccountUpdate(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
-  // Update email and set verified back to false.
-  if (!user) {
-    User.update(
-      { _id: req.user._id },
-      { $set: { email: newEmail, emailVerified: false } }
-    );
+  // Find user
+  let user = await User.findOne({ username: req.body.username });
+  if (!user) return res.status(400).send("No user associated with username.");
+
+  // Check if user email is the same as input email
+  if (user.email != req.user.email) {
+    // if not equal, count to see how many accounts have that email
+    let count = await User.countDocuments({
+      _id: { $ne: user._id },
+      email: req.user.email
+    });
+    // if there is already an account with that email then return 400
+    if (count > 0) {
+      return res
+        .status(400)
+        .send({ ex: "Email", message: "Email already registered." });
+    }
+
+    // set verified to false and user email to new email
+    user.isVerified = false;
+    user.email = req.user.email;
   }
+
+  // Check if password matches
+  const validPassword = await bcrypt.compare(req.user.password, user.password);
+  if (!validPassword) return res.status(400).send("Invalid password");
+
+  // if there is a new password generate new salt/hash
+  if (req.user.newPass) {
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(req.user.newPass, salt);
+  }
+  user.save();
+
+  // generate new auth token
+  const token = user.generateAuthToken();
+  res
+    .header("ws-auth-token", token)
+    .send(_.pick(user, ["_id", "username", "email"]));
 });
 
-// Update password
-router.put("/password", auth, async (req, res) => {
-  const user = await User.findById({
-    _id: req.user._id
-  });
-
-  if (!user) return res.status(400).send("No user associated with id.");
-  const salt = await bcrypt.genSalt(10);
-  user.password = await bcrypt.hash(user.password, salt);
-  await user.save();
-
-  res.send(user);
-});
-
+// add liked recipe id to user and increment likes on recipe document
 router.put("/like", auth, async (req, res) => {
   let user = await User.findById(req.body.userId).select(
     "-password -email -emailVerified -isAdmin -firstName -lastName"
@@ -145,6 +169,7 @@ router.put("/like", auth, async (req, res) => {
     });
 });
 
+// remove recipe id from user and decerement likes on recipe document
 router.put("/unlike", auth, async (req, res) => {
   let user = await User.findById({ _id: req.body.userId }).select(
     "-password -email -emailVerified -isAdmin -firstName -lastName"
