@@ -138,9 +138,8 @@ router.put("/account", auth, async (req, res) => {
       const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(req.body.newPass, salt);
     }
-    await user.save();
-
     // generate new auth token
+    await user.save();
     const token = user.generateAuthToken();
     res
       .header("ws-auth-token", token)
