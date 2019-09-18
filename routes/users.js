@@ -109,11 +109,11 @@ router.put("/account", auth, async (req, res) => {
   if (!user) return res.status(400).send("No user associated with username.");
 
   // Check if user email is the same as input email
-  if (user.email != req.user.email) {
+  if (user.email != req.body.email) {
     // if not equal, count to see how many accounts have that email
     let count = await User.countDocuments({
       _id: { $ne: user._id },
-      email: req.user.email
+      email: req.body.email
     });
     // if there is already an account with that email then return 400
     if (count > 0) {
@@ -124,15 +124,15 @@ router.put("/account", auth, async (req, res) => {
 
     // set verified to false and user email to new email
     user.isVerified = false;
-    user.email = req.user.email;
+    user.email = req.body.email;
   }
 
   // Check if password matches
-  const validPassword = await bcrypt.compare(req.user.password, user.password);
+  const validPassword = await bcrypt.compare(req.body.password, user.password);
   if (!validPassword) return res.status(400).send("Invalid password");
 
   // if there is a new password generate new salt/hash
-  if (req.user.newPass) {
+  if (req.body.newPass && req.body.newPass != "") {
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(req.user.newPass, salt);
   }

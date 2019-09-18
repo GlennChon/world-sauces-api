@@ -66,7 +66,9 @@ function validateAccountUpdate(user) {
     password: Joi.string()
       .required()
       .min(6),
-    newPass: Joi.string().min(6),
+    newPass: Joi.string()
+      .allow("", null)
+      .min(6),
     username: Joi.string()
       .required()
       .min(3)
