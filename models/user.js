@@ -63,23 +63,16 @@ function validateUserUpdate(user) {
 
 function validateAccountUpdate(user) {
   const schema = {
-    password: {
-      type: String,
-      required: true,
-      minLength: 6
-    },
-    newPass: {
-      type: String,
-      minLength: 6
-    },
-    username: {
-      type: String,
-      unique: true,
-      required: true,
-      trim: true,
-      min: 3,
-      max: 20
-    },
+    password: Joi.string()
+      .required()
+      .min(6),
+    newPass: Joi.string().min(6),
+    username: Joi.string()
+      .required()
+      .min(3)
+      .max(20)
+      .trim()
+      .unique(),
     email: Joi.string()
       .min(5)
       .max(255)
