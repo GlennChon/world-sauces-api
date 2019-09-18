@@ -101,44 +101,53 @@ router.put("/me", auth, async (req, res) => {
 
 // Update password and email
 router.put("/account", auth, async (req, res) => {
-  const { error } = validateAccountUpdate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+  try {
+    const { error } = validateAccountUpdate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
 
-  // Find user
-  let user = await User.findOne({ username: req.body.username });
-  if (!user) return res.status(400).send("No user associated with username.");
+    // Find user
+    let user = await User.findOne({ username: req.body.username });
+    if (!user) return res.status(400).send("No user associated with username.");
 
-  // Check if user email is the same as input email
-  if (user.email != req.body.email) {
-    // if not equal, count to see how many accounts have that email
-    let count = await User.countDocuments({
-      _id: { $ne: user._id },
-      email: req.body.email
-    });
-    // if there is already an account with that email then return 400
-    if (count > 0) {
-      return res.status(400).send("Email already registered");
+    // Check if user email is the same as input email
+    if (user.email != req.body.email) {
+      // if not equal, count to see how many accounts have that email
+      let count = await User.countDocuments({
+        _id: { $ne: user._id },
+        email: req.body.email
+      });
+      // if there is already an account with that email then return 400
+      if (count > 0) {
+        return res.status(400).send("Email already registered");
+      }
+
+      // set verified to false and user email to new email
+      user.isVerified = false;
+      user.email = req.body.email;
     }
 
-    // set verified to false and user email to new email
-    user.isVerified = false;
-    user.email = req.body.email;
+    // Check if password matches
+    const validPassword = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
+    if (!validPassword) return res.status(400).send("Invalid password");
+
+    // if there is a new password generate new salt/hash
+    if (req.body.newPass && req.body.newPass != "") {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(req.body.newPass, salt);
+    }
+    await user.save();
+
+    // generate new auth token
+    const token = user.generateAuthToken();
+    res
+      .header("ws-auth-token", token)
+      .send(_.pick(user, ["_id", "username", "email"]));
+  } catch (err) {
+    res.status(500).send(err);
   }
-
-  // Check if password matches
-  const validPassword = await bcrypt.compare(req.body.password, user.password);
-  if (!validPassword) return res.status(400).send("Invalid password");
-
-  // if there is a new password generate new salt/hash
-  if (req.body.newPass && req.body.newPass != "") {
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(req.body.newPass, salt);
-  }
-  const result = await user.save().select("_id username email");
-
-  // generate new auth token
-  const token = user.generateAuthToken();
-  res.header("ws-auth-token", token).send(result);
 });
 
 // add liked recipe id to user and increment likes on recipe document
