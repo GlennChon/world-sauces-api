@@ -134,13 +134,11 @@ router.put("/account", auth, async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(req.user.newPass, salt);
   }
-  user.save();
+  const result = await user.save().select("_id username email");
 
   // generate new auth token
   const token = user.generateAuthToken();
-  res
-    .header("ws-auth-token", token)
-    .send(_.pick(user, ["_id", "username", "email"]));
+  res.header("ws-auth-token", token).send(result);
 });
 
 // add liked recipe id to user and increment likes on recipe document
