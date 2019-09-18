@@ -72,9 +72,7 @@ function validateAccountUpdate(user) {
     username: Joi.string()
       .required()
       .min(3)
-      .max(20)
-      .trim()
-      .unique(),
+      .max(20),
     email: Joi.string()
       .min(5)
       .max(255)
