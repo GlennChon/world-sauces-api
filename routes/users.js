@@ -117,9 +117,7 @@ router.put("/account", auth, async (req, res) => {
     });
     // if there is already an account with that email then return 400
     if (count > 0) {
-      return res
-        .status(400)
-        .send({ ex: "Email", message: "Email already registered." });
+      return res.status(400).send("Email already registered");
     }
 
     // set verified to false and user email to new email
