@@ -75,7 +75,7 @@ router.post("/", async (req, res) => {
   const token = user.generateAuthToken();
   res
     .header("ws-auth-token", token)
-    .send(_.pick(user, ["_id", "username", "email"]));
+    .send(_.pick(user, ["_id", "username", "email", "isAdmin"]));
 });
 
 // Put User by ID (Update)
@@ -144,7 +144,7 @@ router.put("/account", auth, async (req, res) => {
     const token = user.generateAuthToken();
     res
       .header("ws-auth-token", token)
-      .send(_.pick(user, ["_id", "username", "email"]));
+      .send(_.pick(user, ["_id", "username", "email", "isAdmin"]));
   } catch (err) {
     res.status(500).send(err);
   }
