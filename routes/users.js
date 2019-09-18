@@ -132,7 +132,7 @@ router.put("/account", auth, async (req, res) => {
   // if there is a new password generate new salt/hash
   if (req.body.newPass && req.body.newPass != "") {
     const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(req.user.newPass, salt);
+    user.password = await bcrypt.hash(req.body.newPass, salt);
   }
   const result = await user.save().select("_id username email");
 
