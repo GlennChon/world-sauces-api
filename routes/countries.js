@@ -7,7 +7,7 @@ const { Country, validateCountry } = require("../models/country");
 router.get("/", async (req, res) => {
   const countries = await Country.find()
     .select({ _id: 0, name: 1, code: 1 })
-    .sort({ name: asc });
+    .sort({ name: 1 });
   res.send(countries);
 });
 
