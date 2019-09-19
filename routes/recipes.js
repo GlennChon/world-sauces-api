@@ -6,11 +6,11 @@ const { TasteProfile } = require("../models/tasteProfile");
 const { Recipe, validateRecipe } = require("../models/recipe");
 
 const router = express.Router();
+const pageSize = 72;
 // RECIPES
 // Get list of recipes
 router.get("/", async (req, res) => {
   const pageNumber = 1;
-  const pageSize = 24;
   const findProps = formatFindProps(req);
   const sortProps = formatSortProps(req);
 
@@ -34,20 +34,26 @@ router.get("/", async (req, res) => {
 
 // get recipes based on array
 router.post("/likes", async (req, res) => {
+  const pageNumber = 1;
   const recipes = await Recipe.find({
     _id: { $in: req.body.likes }
-  }).sort({ title: 1 });
+  })
+    .sort({ title: 1 })
+    .skip((pageNumber - 1) * pageSize)
+    .limit(pageSize);
   res.send(recipes);
 });
 
 router.get("/random", async (req, res) => {
-  const recipes = await Recipe.aggregate([{ $sample: { size: 24 } }]);
+  const pageNumber = 1;
+  const recipes = await Recipe.aggregate([{ $sample: { size: 12 } }])
+    .skip((pageNumber - 1) * pageSize)
+    .limit(pageSize);
   res.send(recipes);
 });
 
 router.get("/popular", async (req, res) => {
   const pageNumber = 1;
-  const pageSize = 24;
   const recipes = await Recipe.find()
     // sort by likes desc
     .sort({ likes: -1 })
