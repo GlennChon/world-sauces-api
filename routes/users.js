@@ -40,7 +40,8 @@ router.post("/me", auth, async (req, res) => {
 
 // Get basic public info of any user
 router.get("/:username", async (req, res) => {
-  const user = await User.findOne({ username: req.params.username }).select(
+  const usernameRegex = new RegExp("^" + req.params.username + "$", "i");
+  const user = await User.findOne({ username: usernameRegex }).select(
     "-password -email -emailVerified -isAdmin -likes -firstName -lastName"
   );
 
