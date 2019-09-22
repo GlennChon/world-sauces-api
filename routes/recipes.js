@@ -197,9 +197,10 @@ router.put("/unlike", auth, async (req, res) => {
   Recipe.updateOne({ _id: req.body._id }, { $inc: { likes: -1 } });
 });
 
-// Delete recipe by ID (just here for administrative purposes.)
-router.delete("/:id", [auth, admin], async (req, res) => {
-  const recipe = await Recipe.findByIdAndRemove(req.params.id);
+// Delete recipe by ID
+router.delete(auth, async (req, res) => {
+  const recipe = await Recipe.findByIdAndRemove(req.body.id);
+  // does not remove from each user's like list
   if (!recipe)
     return res.status(404).send("The recipe with given id was not found");
   res.send(recipe);
