@@ -199,12 +199,16 @@ router.put("/unlike", auth, async (req, res) => {
 
 // Delete recipe by ID
 router.delete(auth, async (req, res) => {
-  console.log(req.body.id);
-  const recipe = await Recipe.findByIdAndRemove(req.body.id);
-  // does not remove from each user's like list
-  if (!recipe)
-    return res.status(404).send("The recipe with given id was not found");
-  res.send(recipe);
+  try {
+    const recipe = await Recipe.findByIdAndRemove({ _id: req.body.id });
+    // does not remove from each user's like list
+    if (!recipe)
+      return res.status(404).send("The recipe with given id was not found");
+    res.send(recipe);
+  } catch (ex) {
+    console.log(ex);
+    console.log(req.body.id);
+  }
 });
 
 module.exports = router;
