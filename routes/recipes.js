@@ -199,6 +199,7 @@ router.put("/unlike", auth, async (req, res) => {
 
 // Delete recipe by ID
 router.delete(auth, async (req, res) => {
+  console.log(req.body.id);
   const recipe = await Recipe.findByIdAndRemove(req.body.id);
   // does not remove from each user's like list
   if (!recipe)
