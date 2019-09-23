@@ -1,5 +1,6 @@
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
+const { ObjectId } = require("mongodb");
 const express = require("express");
 const { Country } = require("../models/country");
 const { TasteProfile } = require("../models/tasteProfile");
@@ -200,14 +201,17 @@ router.put("/unlike", auth, async (req, res) => {
 // Delete recipe by ID
 router.delete(auth, async (req, res) => {
   try {
-    const recipe = await Recipe.findByIdAndRemove({ _id: req.body.id });
+    const recipe = await Recipe.findByIdAndRemove({
+      _id: ObjectId(req.body.id)
+    });
     // does not remove from each user's like list
-    if (!recipe)
+    if (!recipe) {
+      console.log(req.body._id);
       return res.status(404).send("The recipe with given id was not found");
+    }
     res.send(recipe);
   } catch (ex) {
-    console.log(ex);
-    console.log(req.body.id);
+    res.status(500).send(ex.message);
   }
 });
 
