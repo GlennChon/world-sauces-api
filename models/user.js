@@ -96,7 +96,6 @@ function validateUser(user) {
       .email(),
     password: Joi.string()
       .min(6)
-      .max(24)
       .required(),
     firstName: Joi.string()
       .allow("", null)
