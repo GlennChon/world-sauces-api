@@ -19,13 +19,9 @@ const router = express.Router();
 
 // User //
 router.get("/all", [auth, admin], async (req, res) => {
-  const pageNumber = 1;
-  const pageSize = 24;
-  const users = await User.find()
-    .select("-password -email -firstname -lastname")
-    //pagination
-    .skip((pageNumber - 1) * pageSize)
-    .limit(pageSize);
+  const users = await User.find().select(
+    "-password -email -firstname -lastname"
+  );
   res.send(users);
 });
 
