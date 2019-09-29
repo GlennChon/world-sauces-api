@@ -1,17 +1,13 @@
 const auth = require("../middleware/auth");
-const admin = require("../middleware/admin");
-const { ObjectId } = require("mongodb");
 const express = require("express");
-const { Country } = require("../models/country");
-const { TasteProfile } = require("../models/tasteProfile");
 const { Recipe, validateRecipe } = require("../models/recipe");
 
 const router = express.Router();
-const pageSize = 72;
 // RECIPES
 // Get list of recipes
 router.get("/", async (req, res) => {
-  const pageNumber = 1;
+  const pageNumber = req.query.page ? parseInt(req.query.page) : 1;
+  const pageSize = req.query.size ? parseInt(req.query.size) : 30;
   const findProps = formatFindProps(req);
   const sortProps = formatSortProps(req);
 
@@ -35,7 +31,8 @@ router.get("/", async (req, res) => {
 
 // get recipes based on array
 router.post("/likes", async (req, res) => {
-  const pageNumber = 1;
+  const pageNumber = req.query.page ? parseInt(req.query.page) : 1;
+  const pageSize = req.query.size ? parseInt(req.query.size) : 30;
   const recipes = await Recipe.find({
     _id: { $in: req.body.likes }
   })
@@ -46,15 +43,13 @@ router.post("/likes", async (req, res) => {
 });
 
 router.get("/random", async (req, res) => {
-  const pageNumber = 1;
-  const recipes = await Recipe.aggregate([{ $sample: { size: 12 } }])
-    .skip((pageNumber - 1) * pageSize)
-    .limit(pageSize);
+  const pageSize = req.query.size ? parseInt(req.query.size) : 3;
+  const recipes = await Recipe.aggregate([{ $sample: { size: pageSize } }]);
   res.send(recipes);
 });
 
 router.get("/popular", async (req, res) => {
-  const pageNumber = 1;
+  const pageSize = req.query.size ? parseInt(req.query.size) : 3;
   const recipes = await Recipe.find()
     // sort by likes desc
     .sort({ likes: -1 })
@@ -67,8 +62,6 @@ router.get("/popular", async (req, res) => {
       image_link: 1,
       likes: 1
     })
-    //pagination
-    .skip((pageNumber - 1) * pageSize)
     .limit(pageSize);
   res.send(recipes);
 });
@@ -204,7 +197,6 @@ router.delete("/:id", auth, async (req, res) => {
     const recipe = await Recipe.findByIdAndRemove(req.params.id);
     // does not remove from each user's like list
     if (!recipe) {
-      console.log(req.body._id);
       return res.status(404).send("The recipe with given id was not found");
     }
     res.send(recipe);
