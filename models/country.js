@@ -1,4 +1,4 @@
-const Joi = require("joi");
+const Joi = require("@hapi/joi");
 const mongoose = require("mongoose");
 
 const countrySchema = new mongoose.Schema({
@@ -8,14 +8,14 @@ const countrySchema = new mongoose.Schema({
 
 const Country = mongoose.model("countries", countrySchema);
 // Not needed but created for possibility of taste profile edits
-function validateCountry(country) {
+async function validateCountry(country) {
   const schema = {
     name: Joi.string().min(2),
     code: Joi.string()
       .min(2)
       .max(2)
   };
-  return Joi.validate(country, schema);
+  return await schema.validate(country);
 }
 
 module.exports = { Country, countrySchema, validateCountry };

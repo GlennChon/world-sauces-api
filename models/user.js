@@ -1,4 +1,4 @@
-const Joi = require("joi"); // Input Validation
+const Joi = require("@hapi/joi"); // Input Validation
 const config = require("config");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
@@ -45,7 +45,8 @@ userSchema.methods.generateAuthToken = function() {
     config.get("jwtPrivateKey")
   );
 };
-function validateUserUpdate(user) {
+
+async function validateUserUpdate(user) {
   const schema = {
     _id: Joi.string(),
     firstName: Joi.string()
@@ -58,10 +59,10 @@ function validateUserUpdate(user) {
       .allow("", null)
       .max(1000)
   };
-  return Joi.validate(user, schema);
+  return schema.validate(user);
 }
 
-function validateAccountUpdate(user) {
+async function validateAccountUpdate(user) {
   const schema = {
     password: Joi.string()
       .required()
@@ -79,11 +80,11 @@ function validateAccountUpdate(user) {
       .required()
       .email()
   };
-  return Joi.validate(user, schema);
+  return await schema.validate(user);
 }
 
 // Joi validation
-function validateUser(user) {
+async function validateUser(user) {
   const schema = {
     username: Joi.string()
       .min(3)
@@ -104,7 +105,7 @@ function validateUser(user) {
       .allow("", null)
       .max(50)
   };
-  return Joi.validate(user, schema);
+  return await schema.validate(user);
 }
 
 const User = mongoose.model("users", userSchema);

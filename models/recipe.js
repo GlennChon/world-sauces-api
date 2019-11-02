@@ -1,4 +1,4 @@
-const Joi = require("joi");
+const Joi = require("@hapi/joi");
 const mongoose = require("mongoose");
 
 const recipeSchema = new mongoose.Schema({
@@ -10,6 +10,12 @@ const recipeSchema = new mongoose.Schema({
   likes: { type: Number, default: 1 },
   image_link: { type: String, default: "", trim: true },
   description: { type: String, default: "" },
+  //not required yet
+  sauce_type: { type: String },
+  yield: { type: String },
+  good_for: { type: String },
+  gluten_free: { type: Boolean },
+  dairy_free: { type: Boolean },
   taste_profile: { type: Array },
   ingredients: {
     type: Array,
@@ -28,6 +34,9 @@ const recipeSchema = new mongoose.Schema({
       },
       message: "A recipe should have at least 1 instruction."
     }
+  },
+  tips: {
+    type: Array
   }
 });
 
@@ -35,7 +44,7 @@ const Recipe = mongoose.model("recipes", recipeSchema);
 
 // Joi validation
 
-function validateRecipe(recipe) {
+async function validateRecipe(recipe) {
   const schema = {
     title: Joi.string()
       .min(2)
@@ -45,6 +54,11 @@ function validateRecipe(recipe) {
       .min(2)
       .max(50)
       .required(),
+    //yield: Joi.string().required(),
+    //sauce_type: Joi.string().required(),
+    //good_for: Joi.string().required(),
+    //gluten_free: Joi.boolean().required(),
+    //dairy_free: Joi.boolean().required(),
     author: Joi.string().required(),
     likes: Joi.number().integer(),
     image_link: Joi.string(),
@@ -66,8 +80,14 @@ function validateRecipe(recipe) {
         })
         .min(1)
     )
+    // ,
+    // tips: Joi.array().items(
+    //   Joi.object().keys({
+    //     value: Joi.string().min(3)
+    //   })
+    // )
   };
-  return Joi.validate(recipe, schema);
+  return await schema.validate(recipe);
 }
 
 module.exports = { Recipe, recipeSchema, validateRecipe };

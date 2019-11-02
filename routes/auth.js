@@ -1,4 +1,4 @@
-const Joi = require("joi");
+const Joi = require("@hapi/joi");
 const _ = require("lodash");
 const bcrypt = require("bcrypt");
 const express = require("express");
@@ -32,7 +32,7 @@ router.post("/", async (req, res) => {
 });
 
 // Joi validation
-function validate(req) {
+async function validate(req) {
   const schema = {
     username: Joi.string()
       .max(255)
@@ -41,7 +41,7 @@ function validate(req) {
       .max(1024)
       .required()
   };
-  return Joi.validate(req, schema);
+  return await schema.validate(req);
 }
 
 module.exports = router;

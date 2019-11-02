@@ -1,4 +1,4 @@
-const Joi = require("joi");
+const Joi = require("@hapi/joi");
 const mongoose = require("mongoose");
 
 const tasteProfileSchema = new mongoose.Schema({
@@ -9,14 +9,14 @@ const tasteProfileSchema = new mongoose.Schema({
 
 const TasteProfile = mongoose.model("taste_profiles", tasteProfileSchema);
 
-function validateTasteProfile(tasteProfile) {
+async function validateTasteProfile(tasteProfile) {
   const schema = {
     name: Joi.string(),
     desc: Joi.string(),
     eg: Joi.string()
   };
 
-  return Joi.validate(tasteProfile, schema);
+  return await schema.validate(tasteProfile);
 }
 
 module.exports = { TasteProfile, tasteProfileSchema, validateTasteProfile };
