@@ -31,7 +31,7 @@ Will install the following dependencies
 - "config": "^3.2.2",
 - "express": "^4.17.1",
 - "helmet": "^3.20.0",
-- "joi": "^14.3.1",
+- "@hapi/joi": "^16.1.4",
 - "jsonwebtoken": "^8.5.1",
 - "lodash": "^4.17.15",
 - "mongoose": "^5.6.10",
