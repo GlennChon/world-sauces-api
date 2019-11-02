@@ -8,17 +8,17 @@ const { TasteProfile } = require("../models/tasteProfile");
 const { Recipe } = require("../models/recipe");
 
 module.exports = async function() {
-  const countryCount = await Country.count();
+  const countryCount = await Country.countDocuments();
   if (countryCount < 1) {
     importData(Country, countries);
   }
 
-  const tprofileCount = await TasteProfile.count();
+  const tprofileCount = await TasteProfile.countDocuments();
   if (tprofileCount < 1) {
     importData(TasteProfile, tasteProfiles);
   }
 
-  const recipeCount = await Recipe.count();
+  const recipeCount = await Recipe.countDocuments();
   if (recipeCount < 1) {
     importData(Recipe, recipes);
   }
