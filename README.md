@@ -61,8 +61,9 @@ Mac:
 
     export mail_server_password=yourMailServerPassword
 
-jwt_private_key : Key used to encrypt JSON web tokens, DO NOT CHECK INTO SOURCE CONTROL IF YOU ARE FORKING THIS. SET A SEPARATE ENV VARIABLE ON YOUR HOST MACHINE.
+jwt_private_key : Key used to encrypt JSON web tokens, DO NOT CHECK INTO SOURCE CONTROL IF YOU ARE CLONING OR FORKING THIS. SET A SEPARATE ENV VARIABLE ON YOUR HOST MACHINE.
 Default value is for testing, do not use in production.
+Location: ./config/default.json
 
 Windows Powershell:
 
